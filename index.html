@@ -21,6 +21,26 @@
       padding-left: 1rem;
     }
 
+    /* NEW: Edge Fading for the scroll rows */
+    .scroll-row::before,
+    .scroll-row::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 100px;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .scroll-row::before {
+      left: 0;
+      background: linear-gradient(to right, #f8f9fa, rgba(248, 249, 250, 0));
+    }
+    .scroll-row::after {
+      right: 0;
+      background: linear-gradient(to left, #f8f9fa, rgba(248, 249, 250, 0));
+    }
+
     .scroll-track {
       display: flex;
       gap: 1rem;
@@ -46,9 +66,12 @@
       to { transform: translateX(0); }
     }
 
+    /* Tech-style card polish */
     .card {
-      min-width: 280px;
-      max-width: 280px;
+      min-width: 300px;
+      border: 1px solid rgba(0,0,0,0.05);
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(5px);
       transition: transform 0.2s ease, opacity 0.6s ease;
       opacity: 0;
       transform: translateY(30px);
@@ -211,48 +234,73 @@ const ideasSystems = [
   {
     title: 'LoRa Mesh Agriculture',
     desc: 'Distributed peer‑to‑peer farm intelligence.',
+    tags: ['R&D', 'AgriTech'],
     link: 'ideas/lora-mesh/index.html'
   },
   {
     title: 'GIS → 3D Simulation',
     desc: 'Geospatial data into interactive 3D spaces.',
+    tags: ['GIS', 'Simulation'],
     link: 'ideas/gis-3d-simulation/index.html'
   },
   {
     title: 'School Weather Network',
     desc: 'Inter‑school sensor data sharing platform.',
+    tags: ['Network', 'Education'],
     link: 'ideas/school-weather-network/index.html'
   }
 ];
 
-const tagColors = {
-  'Embedded': 'bg-primary',
-  'IoT': 'bg-secondary',
-  'Energy': 'bg-success',
-  'Sustainability': 'bg-warning text-dark',
-  'Sensors': 'bg-info',
-  'Data': 'bg-secondary'
-};
+// Helper to get consistent tag colors and styles
+function getTagClass(tag) {
+  const map = {
+    'Embedded': 'bg-primary',
+    'IoT': 'bg-secondary',
+    'Energy': 'bg-success',
+    'Sustainability': 'bg-warning text-dark',
+    'Sensors': 'bg-info',
+    'Data': 'bg-secondary',
+    'R&D': 'bg-dark',
+    'AgriTech': 'bg-success',
+    'GIS': 'bg-info text-dark',
+    'Simulation': 'bg-warning text-dark',
+    'Network': 'bg-secondary',
+    'Education': 'bg-light text-dark border'
+  };
+  return map[tag] || 'bg-light text-dark border';
+}
 
 function renderCards(container, systems, isBuilt = false) {
   container.innerHTML = '';
-  const allCards = [...systems, ...systems];
-  allCards.forEach(system => {
+  if (!systems || systems.length === 0) return;
+
+  // Build a longer list to make scrolling feel continuous
+  let displayList = [...systems];
+  while (displayList.length < 12) displayList = [...displayList, ...systems];
+
+  displayList.forEach(system => {
     const card = document.createElement('div');
-    card.className = 'card shadow-sm';
-    if (!isBuilt) card.classList.add('border-secondary');
+    card.className = 'card shadow-sm h-100';
+
+    const tagsHtml = system.tags
+      ? system.tags.map(t => `<span class="badge ${getTagClass(t)} tag me-1">${t}</span>`).join('')
+      : '<span class="badge bg-light text-dark border tag">Internal</span>';
+
     card.innerHTML = `
-      <div class="card-body">
-        <h5 class="card-title">${system.title}</h5>
-        <p class="card-text">${system.desc}</p>
-        ${system.tags ? system.tags.map(tag => `<span class="badge ${tagColors[tag] || 'bg-primary'} tag">${tag}</span>`).join(' ') : ''}
-        <a href="${system.link}" class="btn btn-sm ${isBuilt ? 'btn-outline-dark' : 'btn-outline-secondary'} mt-2">${isBuilt ? 'View' : 'Explore'}</a>
+      <div class="card-body d-flex flex-column">
+        <h6 class="text-uppercase text-muted fw-bold mb-2" style="font-size: 0.65rem; letter-spacing: 1px;">
+          ${isBuilt ? 'System Deployment' : 'Experimental Concept'}
+        </h6>
+        <h5 class="card-title fw-bold">${system.title}</h5>
+        <p class="card-text text-muted small flex-grow-1">${system.desc}</p>
+        <div class="mt-2 mb-3">${tagsHtml}</div>
+        <a href="${system.link}" class="btn btn-sm ${isBuilt ? 'btn-primary' : 'btn-outline-dark'} w-100">
+          ${isBuilt ? 'View System' : 'View Proposal'}
+        </a>
       </div>
     `;
+
     container.appendChild(card);
-  });
-  // re-observe
-  container.querySelectorAll('.card').forEach(card => {
     observer.observe(card);
   });
 }
