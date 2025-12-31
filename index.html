@@ -131,47 +131,22 @@
 </section>
 
 <!-- BUILT SYSTEMS ROW -->
-<section class="py-5">
+<section id="built-systems" class="py-5">
   <div class="container-fluid">
     <h3 class="mb-3 ps-4">Built Systems</h3>
 
+    <div class="filter-bar d-flex gap-2 mb-3 ps-4">
+      <button class="filter-btn btn btn-sm btn-outline-primary active" data-tag="all">All</button>
+      <button class="filter-btn btn btn-sm btn-outline-primary" data-tag="Embedded">Embedded</button>
+      <button class="filter-btn btn btn-sm btn-outline-secondary" data-tag="IoT">IoT</button>
+      <button class="filter-btn btn btn-sm btn-outline-success" data-tag="Energy">Energy</button>
+      <button class="filter-btn btn btn-sm btn-outline-warning" data-tag="Sustainability">Sustainability</button>
+      <button class="filter-btn btn btn-sm btn-outline-info" data-tag="Sensors">Sensors</button>
+      <button class="filter-btn btn btn-sm btn-outline-secondary" data-tag="Data">Data</button>
+    </div>
+
     <div class="scroll-row">
       <div class="scroll-track">
-
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">SafeSail Tracker</h5>
-            <p class="card-text">Emergency tracking for water transport safety.</p>
-            <span class="badge bg-primary tag">Embedded</span>
-            <span class="badge bg-secondary tag">IoT</span>
-            <a href="projects/safesail/index.html" class="btn btn-sm btn-outline-dark mt-2">View</a>
-          </div>
-        </div>
-
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">BF‑4™ Biogas System</h5>
-            <p class="card-text">Household waste‑to‑energy solution.</p>
-            <span class="badge bg-success tag">Energy</span>
-            <span class="badge bg-warning text-dark tag">Sustainability</span>
-            <a href="projects/biogas/index.html" class="btn btn-sm btn-outline-dark mt-2">View</a>
-          </div>
-        </div>
-
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">Mini Weather Station</h5>
-            <p class="card-text">Environmental monitoring & early warnings.</p>
-            <span class="badge bg-info tag">Sensors</span>
-            <span class="badge bg-secondary tag">Data</span>
-            <a href="projects/weather-system/index.html" class="btn btn-sm btn-outline-dark mt-2">View</a>
-          </div>
-        </div>
-
-        <!-- DUPLICATES FOR LOOP -->
-        <div class="card shadow-sm"><div class="card-body">SafeSail Tracker</div></div>
-        <div class="card shadow-sm"><div class="card-body">BF‑4™ Biogas</div></div>
-        <div class="card shadow-sm"><div class="card-body">Mini Weather Station</div></div>
 
       </div>
     </div>
@@ -179,41 +154,12 @@
 </section>
 
 <!-- IDEAS ROW -->
-<section class="py-5 bg-light">
+<section id="ideas" class="py-5 bg-light">
   <div class="container-fluid">
     <h3 class="mb-3 ps-4">Ideas & Experimental Systems</h3>
 
     <div class="scroll-row">
       <div class="scroll-track reverse">
-
-        <div class="card border-secondary">
-          <div class="card-body">
-            <h5 class="card-title">LoRa Mesh Agriculture</h5>
-            <p class="card-text">Distributed peer‑to‑peer farm intelligence.</p>
-            <a href="ideas/lora-mesh/index.html" class="btn btn-sm btn-outline-secondary">Explore</a>
-          </div>
-        </div>
-
-        <div class="card border-secondary">
-          <div class="card-body">
-            <h5 class="card-title">GIS → 3D Simulation</h5>
-            <p class="card-text">Geospatial data into interactive 3D spaces.</p>
-            <a href="ideas/gis-3d-simulation/index.html" class="btn btn-sm btn-outline-secondary">Explore</a>
-          </div>
-        </div>
-
-        <div class="card border-secondary">
-          <div class="card-body">
-            <h5 class="card-title">School Weather Network</h5>
-            <p class="card-text">Inter‑school sensor data sharing platform.</p>
-            <a href="ideas/school-weather-network/index.html" class="btn btn-sm btn-outline-secondary">Explore</a>
-          </div>
-        </div>
-
-        <!-- DUPLICATES -->
-        <div class="card border-secondary"><div class="card-body">LoRa Mesh</div></div>
-        <div class="card border-secondary"><div class="card-body">GIS → 3D</div></div>
-        <div class="card border-secondary"><div class="card-body">Weather Network</div></div>
 
       </div>
     </div>
@@ -237,10 +183,95 @@
       }
     });
   }, { threshold: 0.2 });
+</script>
 
-  document.querySelectorAll('.card').forEach(card => {
+<script>
+const builtSystems = [
+  {
+    title: 'SafeSail Tracker',
+    desc: 'Emergency tracking for water transport safety.',
+    tags: ['Embedded', 'IoT'],
+    link: 'projects/safesail/index.html'
+  },
+  {
+    title: 'BF‑4™ Biogas System',
+    desc: 'Household waste‑to‑energy solution.',
+    tags: ['Energy', 'Sustainability'],
+    link: 'projects/biogas/index.html'
+  },
+  {
+    title: 'Mini Weather Station',
+    desc: 'Environmental monitoring & early warnings.',
+    tags: ['Sensors', 'Data'],
+    link: 'projects/weather-system/index.html'
+  }
+];
+
+const ideasSystems = [
+  {
+    title: 'LoRa Mesh Agriculture',
+    desc: 'Distributed peer‑to‑peer farm intelligence.',
+    link: 'ideas/lora-mesh/index.html'
+  },
+  {
+    title: 'GIS → 3D Simulation',
+    desc: 'Geospatial data into interactive 3D spaces.',
+    link: 'ideas/gis-3d-simulation/index.html'
+  },
+  {
+    title: 'School Weather Network',
+    desc: 'Inter‑school sensor data sharing platform.',
+    link: 'ideas/school-weather-network/index.html'
+  }
+];
+
+const tagColors = {
+  'Embedded': 'bg-primary',
+  'IoT': 'bg-secondary',
+  'Energy': 'bg-success',
+  'Sustainability': 'bg-warning text-dark',
+  'Sensors': 'bg-info',
+  'Data': 'bg-secondary'
+};
+
+function renderCards(container, systems, isBuilt = false) {
+  container.innerHTML = '';
+  const allCards = [...systems, ...systems];
+  allCards.forEach(system => {
+    const card = document.createElement('div');
+    card.className = 'card shadow-sm';
+    if (!isBuilt) card.classList.add('border-secondary');
+    card.innerHTML = `
+      <div class="card-body">
+        <h5 class="card-title">${system.title}</h5>
+        <p class="card-text">${system.desc}</p>
+        ${system.tags ? system.tags.map(tag => `<span class="badge ${tagColors[tag] || 'bg-primary'} tag">${tag}</span>`).join(' ') : ''}
+        <a href="${system.link}" class="btn btn-sm ${isBuilt ? 'btn-outline-dark' : 'btn-outline-secondary'} mt-2">${isBuilt ? 'View' : 'Explore'}</a>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  // re-observe
+  container.querySelectorAll('.card').forEach(card => {
     observer.observe(card);
   });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const builtContainer = document.querySelector('#built-systems .scroll-track');
+  const ideasContainer = document.querySelector('#ideas .scroll-track');
+  renderCards(builtContainer, builtSystems, true);
+  renderCards(ideasContainer, ideasSystems, false);
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const tag = btn.dataset.tag;
+      const filtered = tag === 'all' ? builtSystems : builtSystems.filter(s => s.tags.includes(tag));
+      renderCards(builtContainer, filtered, true);
+    });
+  });
+});
 </script>
 
 </body>
