@@ -184,15 +184,22 @@
 
     .tag { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    .social-nav {
+    /* Prevent the horizontal "second column" scroll */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+.social-nav {
   position: fixed; 
   top: 50%; 
-  right: 15px; 
+  right: 10px; /* Reduced slightly to stay inside mobile safe zones */
   transform: translateY(-50%);
   display: flex; 
   flex-direction: column; 
   gap: 10px; 
-  z-index: 10000; /* Increased to stay above the grain overlay */
+  z-index: 10000; /* Higher than your grain overlay */
 }
 
 .social-nav a {
@@ -206,7 +213,6 @@
   border-radius: 50%; 
   text-decoration: none; 
   transition: 0.3s;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .social-nav a:hover { 
@@ -214,28 +220,10 @@
   transform: translateX(-5px); 
 }
 
-/* 3. Mobile Adjustment: Moves links to a horizontal bar at the bottom */
-@media (max-width: 768px) {
-  .social-nav {
-    top: auto;
-    bottom: 20px;
-    right: 20px;
-    transform: none;
-    flex-direction: row; /* Horizontal layout is better for thumbs */
-    background: rgba(33, 37, 41, 0.9);
-    padding: 8px;
-    border-radius: 50px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  }
-
-  .social-nav a {
-    width: 35px;
-    height: 35px;
-  }
-  
-  .social-nav a:hover {
-    transform: translateY(-5px); /* Lift up instead of left on mobile */
+/* Ensure cards don't push the screen wider than mobile phones */
+@media (max-width: 400px) {
+  .card {
+    min-width: 280px !important; /* Forces cards to shrink for tiny phones */
   }
 }
   </style>
