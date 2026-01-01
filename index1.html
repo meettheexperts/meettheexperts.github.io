@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <title>MTE – Systems Integrators & Intelligence Architects</title>
@@ -11,480 +10,386 @@
 
   <style>
     /* Technical Blueprint Background */
+    body { 
+      background-color: #f8f9fa; 
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    /* ===== Animated Scroll Rows ===== */
+    .scroll-row {
+      overflow: hidden;
+      position: relative;
+      padding: 1.5rem 0;
+    }
+
+    .scroll-row::before, .scroll-row::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 120px;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .scroll-row::before { left: 0; background: linear-gradient(to right, #f8f9fa, transparent); }
+    .scroll-row::after { right: 0; background: linear-gradient(to left, #f8f9fa, transparent); }
+
+    .scroll-track {
+      display: flex;
+      gap: 1.5rem;
+      width: max-content;
+      animation: scroll-left 45s linear infinite;
+    }
+
+    .scroll-track.reverse { animation: scroll-right 50s linear infinite; }
     
-      /* Technical Blueprint Background */
-      body {
-        background-color: #f8f9fa;
-        background-image:
-          linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-        background-size: 30px 30px;
-      }
+    .scroll-row:hover .scroll-track,
+    .stop-scroll { 
+      animation-play-state: paused !important; 
+    }
 
-      /* ===== Animated Scroll Rows ===== */
-      .scroll-row {
-        overflow: hidden;
-        position: relative;
-        padding: 1.5rem 0;
-      }
+    @keyframes scroll-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @keyframes scroll-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
 
-      .scroll-row::before,
-      .scroll-row::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        width: 120px;
-        height: 100%;
-        z-index: 2;
-        pointer-events: none;
-      }
+    /* Tech-style card polish */
+    .card {
+  min-width: 320px;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-left: 4px solid #212529 !important;
+  background: rgba(255, 255, 255, 0.85); /* Slightly more transparent */
+  backdrop-filter: blur(12px); /* Increased blur for better legibility */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother hover */
+}
+    .card {
+      
+      
+      opacity: 0;
+      transform: translateY(40px) scale(0.98);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+    }
 
-      .scroll-row::before {
-        left: 0;
-        background: linear-gradient(to right, #f8f9fa, transparent);
-      }
+    .card.in-view { opacity: 1; 
+    transform: translateY(0) scale(1);}
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
 
-      .scroll-row::after {
-        right: 0;
-        background: linear-gradient(to left, #f8f9fa, transparent);
-      }
+    /* Architecture Pillar Styling */
+    .pillar-card {
+      transition: all 0.3s ease;
+      border-left-width: 5px !important;
+    }
+    .pillar-card:hover {
+      background-color: #ffffff !important;
+      transform: scale(1.02);
+      box-shadow: 0 10px 15px rgba(0,0,0,0.05) !important;
+    }
 
-      .scroll-track {
-        display: flex;
-        gap: 1.5rem;
-        width: max-content;
-        animation: scroll-left 45s linear infinite;
-      }
+    .status-pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #28a745;
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+    .sticky-ribbon {
+  position: -webkit-sticky; /* For Safari */
+  position: sticky;
+  top: 0;
+  z-index: 1020; /* Higher than cards, lower than modals */
+  background: #212529; /* Solid color to prevent transparency while scrolling */
+}
+/* Ensure sections have enough height to see the background move */
+#ideas {
+  background-color: transparent !important; /* Let the bridge image show through */
+}
 
-      .scroll-track.reverse {
-        animation: scroll-right 50s linear infinite;
-      }
+#built-systems {
+  background-color: rgba(255, 255, 255, 0.6) !important; /* Semi-transparent white */
+}
 
-      .scroll-row:hover .scroll-track,
-      .stop-scroll {
-        animation-play-state: paused !important;
-      }
+#built-systems, #ideas {
+  min-height: 700px; /* Increased slightly for better parallax travel distance */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative; /* Crucial so stationary images stay contained */
+  padding: 80px 0;    /* Adds extra space for the "Bridge" images to overlap */
+}
 
-      @keyframes scroll-left {
-        from {
-          transform: translateX(0);
-        }
-
-        to {
-          transform: translateX(-50%);
-        }
-      }
-
-      @keyframes scroll-right {
-        from {
-          transform: translateX(-50%);
-        }
-
-        to {
-          transform: translateX(0);
-        }
-      }
-
-      /* Tech-style card polish */
-      .card {
-        min-width: 320px;
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        border-left: 4px solid #212529 !important;
-        background: rgba(255, 255, 255, 0.85);
-        /* Slightly more transparent */
-        backdrop-filter: blur(12px);
-        /* Increased blur for better legibility */
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        /* Smoother hover */
-      }
-
-      .card {
-
-
-        opacity: 0;
-        transform: translateY(40px) scale(0.98);
-        transition: opacity 0.8s ease, transform 0.8s ease;
-      }
-
-      .card.in-view {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-
-      .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-      }
-
-      /* Architecture Pillar Styling */
-      .pillar-card {
-        transition: all 0.3s ease;
-        border-left-width: 5px !important;
-      }
-
-      .pillar-card:hover {
-        background-color: #ffffff !important;
-        transform: scale(1.02);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05) !important;
-      }
-
-      .status-pulse {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        background: #28a745;
-        border-radius: 50%;
-        margin-right: 6px;
-        animation: pulse 2s infinite;
-      }
-
-      .sticky-ribbon {
-        position: -webkit-sticky;
-        /* For Safari */
-        position: sticky;
-        top: 0;
-        z-index: 1020;
-        /* Higher than cards, lower than modals */
-        background: #212529;
-        /* Solid color to prevent transparency while scrolling */
-      }
-
-      /* Ensure sections have enough height to see the background move */
-      #ideas {
-        background-color: transparent !important;
-        /* Let the bridge image show through */
-      }
-
-      #built-systems {
-        background-color: rgba(255, 255, 255, 0.6) !important;
-        /* Semi-transparent white */
-      }
-
-      #built-systems,
-      #ideas {
-        min-height: 700px;
-        /* Increased slightly for better parallax travel distance */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        position: relative;
-        /* Crucial so stationary images stay contained */
-        padding: 80px 0;
-        /* Adds extra space for the "Bridge" images to overlap */
-      }
-
-      /* REPLACE OLD .ghost-artifact WITH THIS */
-      /* Core styling for the floating background images */
-      .ghost-artifact {
-        position: absolute;
-        opacity: 0.06;
-        pointer-events: none;
-        z-index: 0;
-        filter: grayscale(100%);
-        will-change: transform;
-        /* Helps the browser keep the movement smooth */
-      }
+/* REPLACE OLD .ghost-artifact WITH THIS */
+/* Core styling for the floating background images */
+.ghost-artifact {
+  position: absolute;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
+  filter: grayscale(100%);
+  will-change: transform; /* Helps the browser keep the movement smooth */
+}
 
 
 
 
-      #contact-cta {
-        background: radial-gradient(circle at 50% 50%, #2c3034 0%, #212529 100%);
-      }
-
-      #contact-cta .ghost-artifact {
-        z-index: 0;
-      }
-
-      #contact-cta .container {
-        z-index: 2;
-        position: relative;
-      }
+#contact-cta {
+  background: radial-gradient(circle at 50% 50%, #2c3034 0%, #212529 100%);
+}
+#contact-cta .ghost-artifact {
+  z-index: 0;
+}
+#contact-cta .container {
+  z-index: 2;
+  position: relative;
+}
 
 
-      .btn-primary {
-        background-color: #007bff;
-        border: none;
-        transition: all 0.3s ease;
-        letter-spacing: 1px;
-      }
+.btn-primary {
+  background-color: #007bff;
+  border: none;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+}
 
-      .btn-primary:hover {
-        background-color: #0056b3;
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3) !important;
-      }
+.btn-primary:hover {
+  background-color: #0056b3;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3) !important;
+}
 
 
 
-      /* Optional: Make the button glow slightly */
-      @keyframes glow {
-        0% {
-          box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
-        }
+/* Optional: Make the button glow slightly */
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(0, 123, 255, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); }
+  100% { box-shadow: 0 0 5px rgba(0, 123, 255, 0.2); }
+}
 
-        50% {
-          box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
-        }
-
-        100% {
-          box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
-        }
-      }
-
-      .btn-primary {
-        animation: glow 3s infinite;
-      }
+.btn-primary {
+  animation: glow 3s infinite;
+}
 
 
-      @keyframes pulse {
-        0% {
-          box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
-        }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(40, 167, 69, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+    }
 
-        70% {
-          box-shadow: 0 0 0 8px rgba(40, 167, 69, 0);
-        }
+    .tag { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        100% {
-          box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
-        }
-      }
-
-      .tag {
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .social-nav {
-        position: fixed;
-        top: 50%;
-        right: 15px;
-        transform: translateY(-50%);
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        z-index: 1000;
-      }
-
-      .social-nav a {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #212529;
-        color: #fff;
-        border-radius: 50%;
-        text-decoration: none;
-        transition: 0.3s;
-      }
-
-      .social-nav a:hover {
-        background: #007bff;
-        transform: translateX(-5px);
-      }
+    .social-nav {
+      position: fixed; top: 50%; right: 15px; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 10px; z-index: 1000;
+    }
+    .social-nav a {
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      background: #212529; color: #fff; border-radius: 50%; text-decoration: none; transition: 0.3s;
+    }
+    .social-nav a:hover { background: #007bff; transform: translateX(-5px); }
   </style>
 </head>
 
 <body>
-  <div
-    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.03; background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grain_Noise.jpg');">
+<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.03; background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grain_Noise.jpg');"></div>
+<div class="social-nav">
+  <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+  <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
+  <a href="mailto:info@mte.com" title="Email"><i class="fa-solid fa-envelope"></i></a>
+</div>
+<div class="sticky-ribbon text-light py-2 border-bottom border-secondary shadow">
+  <div class="container-fluid d-flex justify-content-around align-items-center small font-monospace text-center flex-wrap">
+    
+    <span class="px-2 d-none d-xl-inline">
+      <i class="fa-solid fa-microchip me-2 text-info"></i>
+      MTE_OS: v2.4
+    </span>
+
+    <span class="px-2">
+      <i class="fa-solid fa-diagram-project me-2 text-success"></i>
+      SYSTEMS: 08
+    </span>
+
+    <span class="px-2">
+      <i class="fa-solid fa-wave-square me-2 text-warning"></i>
+      UPTIME: 99.98%
+    </span>
+
+    <span class="px-2 d-none d-md-inline">
+      <i class="fa-solid fa-database me-2 text-primary"></i>
+      PIPELINES: ACTIVE
+    </span>
+
+    <span class="px-2 font-monospace text-success border-start border-secondary ps-3 ms-2 d-none d-sm-inline" id="live-clock">
+      03:03:00 AM
+    </span>
   </div>
-  <div class="social-nav">
-    <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-    <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
-    <a href="mailto:info@mte.com" title="Email"><i class="fa-solid fa-envelope"></i></a>
-  </div>
-  <div class="sticky-ribbon text-light py-2 border-bottom border-secondary shadow">
-    <div
-      class="container-fluid d-flex justify-content-around align-items-center small font-monospace text-center flex-wrap">
+</div>
 
-      <span class="px-2 d-none d-xl-inline">
-        <i class="fa-solid fa-microchip me-2 text-info"></i>
-        MTE_OS: v2.4
-      </span>
+<section class="pt-5 pb-4 position-relative overflow-hidden" style="min-height: 50vh; display: flex; align-items: center;">
+  
+  <img src="images/image.jpg" 
+       class="ghost-artifact parallax-img" 
+       data-speed="0.6" 
+       style="right: 5%; top: 20px; height: 140%; opacity: 0.05; transform: rotate(-15deg); z-index: 0;">
 
-      <span class="px-2">
-        <i class="fa-solid fa-diagram-project me-2 text-success"></i>
-        SYSTEMS: 08
-      </span>
-
-      <span class="px-2">
-        <i class="fa-solid fa-wave-square me-2 text-warning"></i>
-        UPTIME: 99.98%
-      </span>
-
-      <span class="px-2 d-none d-md-inline">
-        <i class="fa-solid fa-database me-2 text-primary"></i>
-        PIPELINES: ACTIVE
-      </span>
-
-      <span class="px-2 font-monospace text-success border-start border-secondary ps-3 ms-2 d-none d-sm-inline"
-        id="live-clock">
-        03:03:00 AM
-      </span>
+  <div class="container text-center position-relative" style="z-index: 1;">
+    <div class="mb-2">
+      <span class="fw-bold text-uppercase" style="letter-spacing: 5px; font-size: 0.85rem; color: #212529;">MeetTheExperts Architecture</span>
     </div>
+    <h1 class="fw-bold display-5">Intelligence Architects & Systems Integrators</h1>
+    <p class="lead text-muted mx-auto" style="max-width: 750px;">
+      Engineering the intersection of physical infrastructure and digital intelligence.
+    </p>
   </div>
+</section>
 
-  <section class="pt-5 pb-4 position-relative overflow-hidden"
-    style="min-height: 50vh; display: flex; align-items: center;">
 
-    <img src="images/image.jpg" class="ghost-artifact parallax-img" data-speed="0.6"
-      style="right: 5%; top: 20px; height: 140%; opacity: 0.05; transform: rotate(-15deg); z-index: 0;">
-
-    <div class="container text-center position-relative" style="z-index: 1;">
-      <div class="mb-2">
-        <span class="fw-bold text-uppercase"
-          style="letter-spacing: 5px; font-size: 0.85rem; color: #212529;">MeetTheExperts Architecture</span>
+<div class="container mb-5">
+  <div class="row g-4 text-center">
+    <div class="col-md-4">
+      <div class="p-4 border-start border-primary bg-white shadow-sm h-100 pillar-card">
+        <i class="fa-solid fa-diagram-project mb-3 text-primary fs-3"></i>
+        <h6 class="fw-bold text-uppercase small mb-3">Systems Integration</h6>
+        <p class="small text-muted mb-0">
+          Designing and integrating hardware, software, and data systems into reliable end-to-end solutions.
+        </p>
       </div>
-      <h1 class="fw-bold display-5">Intelligence Architects & Systems Integrators</h1>
-      <p class="lead text-muted mx-auto" style="max-width: 750px;">
-        Engineering the intersection of physical infrastructure and digital intelligence.
-      </p>
     </div>
-  </section>
-
-
-  <div class="container mb-5">
-    <div class="row g-4 text-center">
-      <div class="col-md-4">
-        <div class="p-4 border-start border-primary bg-white shadow-sm h-100 pillar-card">
-          <i class="fa-solid fa-diagram-project mb-3 text-primary fs-3"></i>
-          <h6 class="fw-bold text-uppercase small mb-3">Systems Integration</h6>
-          <p class="small text-muted mb-0">
-            Designing and integrating hardware, software, and data systems into reliable end-to-end solutions.
-          </p>
-        </div>
+    <div class="col-md-4">
+      <div class="p-4 border-start border-success bg-white shadow-sm h-100 pillar-card">
+        <i class="fa-solid fa-microchip mb-3 text-success fs-3"></i>
+        <h6 class="fw-bold text-uppercase small mb-3">Edge Intelligence</h6>
+        <p class="small text-muted mb-0">
+          On-device sensing, decision-making, and automation that works even with limited connectivity.
+        </p>
       </div>
-      <div class="col-md-4">
-        <div class="p-4 border-start border-success bg-white shadow-sm h-100 pillar-card">
-          <i class="fa-solid fa-microchip mb-3 text-success fs-3"></i>
-          <h6 class="fw-bold text-uppercase small mb-3">Edge Intelligence</h6>
-          <p class="small text-muted mb-0">
-            On-device sensing, decision-making, and automation that works even with limited connectivity.
-          </p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="p-4 border-start border-info bg-white shadow-sm h-100 pillar-card">
-          <i class="fa-solid fa-map-location-dot mb-3 text-info fs-3"></i>
-          <h6 class="fw-bold text-uppercase small mb-3">Geospatial Insights</h6>
-          <p class="small text-muted mb-0">
-            Collecting, visualizing, and analyzing field data to turn raw measurements into actionable insight.
-          </p>
-        </div>
+    </div>
+    <div class="col-md-4">
+      <div class="p-4 border-start border-info bg-white shadow-sm h-100 pillar-card">
+        <i class="fa-solid fa-map-location-dot mb-3 text-info fs-3"></i>
+        <h6 class="fw-bold text-uppercase small mb-3">Geospatial Insights</h6>
+        <p class="small text-muted mb-0">
+          Collecting, visualizing, and analyzing field data to turn raw measurements into actionable insight.
+        </p>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="container mb-5">
-    <div class="row justify-content-center align-items-center g-5 text-muted text-center opacity-75">
-      <div class="col-auto">
-        <i class="fa-solid fa-tower-broadcast fs-3 d-block mb-2"></i>
-        <span class="small fw-bold">LoRaWAN</span>
+<div class="container mb-5">
+  <div class="row justify-content-center align-items-center g-5 text-muted text-center opacity-75">
+    <div class="col-auto">
+      <i class="fa-solid fa-tower-broadcast fs-3 d-block mb-2"></i>
+      <span class="small fw-bold">LoRaWAN</span>
+    </div>
+    <div class="col-auto">
+      <i class="fa-solid fa-microchip fs-3 d-block mb-2"></i>
+      <span class="small fw-bold">ESP32/C++</span>
+    </div>
+    <div class="col-auto">
+      <i class="fa-brands fa-python fs-3 d-block mb-2"></i>
+      <span class="small fw-bold">Python</span>
+    </div>
+    <div class="col-auto">
+      <i class="fa-brands fa-aws fs-3 d-block mb-2"></i>
+      <span class="small fw-bold">Cloud Arch</span>
+    </div>
+    <div class="col-auto">
+      <i class="fa-brands fa-docker fs-3 d-block mb-2"></i>
+      <span class="small fw-bold">Docker</span>
+    </div>
+  </div>
+</div>
+<div class="position-relative w-100" style="height: 0; z-index: 0;">
+  <img src="images/image (3).jpg" 
+       class="ghost-artifact parallax-img" 
+       data-speed="0.5" 
+       style="left: 10%; top: -150px; height: 400px; opacity: 0.08; transform: rotate(-5deg);">
+</div> 
+
+<section id="built-systems" class="py-5 bg-white bg-opacity-50 border-top border-bottom position-relative overflow-hidden">
+  
+  <img src="images/technology-background-with-chip.jpg" 
+       style="position: absolute; right: -50px; bottom: -20px; opacity: 0.04; height: 110%; z-index: 0; filter: grayscale(100%); pointer-events: none; transform: rotate(3deg);">
+
+  
+
+  <div class="container-fluid position-relative" style="z-index: 1;">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3 px-4 gap-3">
+      
+      <div>
+        <h3 class="fw-bold m-0 text-uppercase small" style="letter-spacing: 2px;">Built Systems</h3>
+        <p class="text-muted small m-0 font-monospace" style="font-size: 0.65rem;">VERIFIED_DEPLOYMENTS_LOG</p>
       </div>
-      <div class="col-auto">
-        <i class="fa-solid fa-microchip fs-3 d-block mb-2"></i>
-        <span class="small fw-bold">ESP32/C++</span>
+
+      <div class="filter-bar d-flex flex-wrap gap-2" data-target="built">
+        <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
+        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Embedded">Embedded</button>
+        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="IoT">IoT</button>
+        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Energy">Energy</button>
+        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Sensors">Sensors</button>
       </div>
-      <div class="col-auto">
-        <i class="fa-brands fa-python fs-3 d-block mb-2"></i>
-        <span class="small fw-bold">Python</span>
+    </div>
+
+    <div class="scroll-row">
+      <div class="scroll-track" id="built-track"></div>
+    </div>
+  </div>
+</section>
+
+<div class="position-relative w-100" style="height: 0; z-index: 0;">
+  <img src="images/image (1).jpg" 
+       class="ghost-artifact parallax-img" 
+       data-speed="-0.4" 
+       style="right: 15%; top: -100px; height: 350px; opacity: 0.07; transform: rotate(10deg);">
+</div>
+
+<section id="ideas" class="py-5 position-relative overflow-hidden">
+  
+ <img src="images/image (2).jpg" 
+       style="position: absolute; left: -100px; top: 0; opacity: 0.05; height: 120%; z-index: 0; transform: rotate(-5deg); pointer-events: none; filter: grayscale(100%);">
+  <div class="container-fluid position-relative" style="z-index: 1;">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3 px-4 gap-3">
+      <h3 class="fw-bold m-0 text-uppercase small" style="letter-spacing: 2px;">R&D / Experimental</h3>
+      <div class="filter-bar d-flex flex-wrap gap-2" data-target="ideas">
+        <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
+        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="R&D">R&D</button>
+        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="AgriTech">AgriTech</button>
+        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="GIS">GIS</button>
+        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Network">Network</button>
       </div>
-      <div class="col-auto">
-        <i class="fa-brands fa-aws fs-3 d-block mb-2"></i>
-        <span class="small fw-bold">Cloud Arch</span>
+    </div>
+    <div class="scroll-row">
+      <div class="scroll-track reverse" id="ideas-track"></div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="specsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white border-0">
+        <h5 class="modal-title fw-bold" id="modalTitle">System Specifications</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="col-auto">
-        <i class="fa-brands fa-docker fs-3 d-block mb-2"></i>
-        <span class="small fw-bold">Docker</span>
+      <div class="modal-body p-4" id="modalContent"></div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-dark w-100 fw-bold" data-bs-dismiss="modal">CLOSE ARCHIVE</button>
       </div>
     </div>
   </div>
-  <div class="position-relative w-100" style="height: 0; z-index: 0;">
-    <img src="images/image (3).jpg" class="ghost-artifact parallax-img" data-speed="0.5"
-      style="left: 10%; top: -150px; height: 400px; opacity: 0.08; transform: rotate(-5deg);">
-  </div>
-
-  <section id="built-systems"
-    class="py-5 bg-white bg-opacity-50 border-top border-bottom position-relative overflow-hidden">
-
-    <img src="images/technology-background-with-chip.jpg"
-      style="position: absolute; right: -50px; bottom: -20px; opacity: 0.04; height: 110%; z-index: 0; filter: grayscale(100%); pointer-events: none; transform: rotate(3deg);">
-
-
-
-    <div class="container-fluid position-relative" style="z-index: 1;">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3 px-4 gap-3">
-
-        <div>
-          <h3 class="fw-bold m-0 text-uppercase small" style="letter-spacing: 2px;">Built Systems</h3>
-          <p class="text-muted small m-0 font-monospace" style="font-size: 0.65rem;">VERIFIED_DEPLOYMENTS_LOG</p>
-        </div>
-
-        <div class="filter-bar d-flex flex-wrap gap-2" data-target="built">
-          <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Embedded">Embedded</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="IoT">IoT</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Energy">Energy</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Sensors">Sensors</button>
-        </div>
-      </div>
-
-      <div class="scroll-row">
-        <div class="scroll-track" id="built-track"></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="position-relative w-100" style="height: 0; z-index: 0;">
-    <img src="images/image (1).jpg" class="ghost-artifact parallax-img" data-speed="-0.4"
-      style="right: 15%; top: -100px; height: 350px; opacity: 0.07; transform: rotate(10deg);">
-  </div>
-
-  <section id="ideas" class="py-5 position-relative overflow-hidden">
-
-    <img src="images/image (2).jpg"
-      style="position: absolute; left: -100px; top: 0; opacity: 0.05; height: 120%; z-index: 0; transform: rotate(-5deg); pointer-events: none; filter: grayscale(100%);">
-    <div class="container-fluid position-relative" style="z-index: 1;">
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3 px-4 gap-3">
-        <h3 class="fw-bold m-0 text-uppercase small" style="letter-spacing: 2px;">R&D / Experimental</h3>
-        <div class="filter-bar d-flex flex-wrap gap-2" data-target="ideas">
-          <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="R&D">R&D</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="AgriTech">AgriTech</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="GIS">GIS</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Network">Network</button>
-        </div>
-      </div>
-      <div class="scroll-row">
-        <div class="scroll-track reverse" id="ideas-track"></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="modal fade" id="specsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header bg-dark text-white border-0">
-          <h5 class="modal-title fw-bold" id="modalTitle">System Specifications</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4" id="modalContent"></div>
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-outline-dark w-100 fw-bold" data-bs-dismiss="modal">CLOSE
-            ARCHIVE</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <section id="contact-cta" class="py-5 bg-dark text-light position-relative overflow-hidden">
-
-    <img src="images/image (4).jpg" class="ghost-artifact parallax-img" data-speed="0.15" style="
+</div>
+<section id="contact-cta" class="py-5 bg-dark text-light position-relative overflow-hidden">
+  
+<img src="images/image (4).jpg"
+     class="ghost-artifact parallax-img"
+     data-speed="0.15"
+     style="
        left: -10%;
        top: -40px;
        height: 140%;
@@ -492,175 +397,176 @@
        --rotation: -3deg;
      ">
 
-    <div class="container position-relative" style="z-index: 1;">
-      <div class="row justify-content-center">
-        <div class="col-lg-8 text-center">
-          <div class="mb-4">
-            <span class="badge border border-success text-success px-3 py-2 mb-3 font-monospace">
-              <span class="status-pulse"></span> SYSTEM_READY: ACCEPTING_NEW_QUERIES
-            </span>
-            <h2 class="display-5 fw-bold mb-3">Ready to Integrate?</h2>
-            <p class="lead opacity-75 mb-5">
-              Whether you need an edge-computing deployment or a custom GIS architecture, our systems are ready to scale
-              with your vision.
-            </p>
-          </div>
+  <div class="container position-relative" style="z-index: 1;">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <div class="mb-4">
+          <span class="badge border border-success text-success px-3 py-2 mb-3 font-monospace">
+            <span class="status-pulse"></span> SYSTEM_READY: ACCEPTING_NEW_QUERIES
+          </span>
+          <h2 class="display-5 fw-bold mb-3">Ready to Integrate?</h2>
+          <p class="lead opacity-75 mb-5">
+            Whether you need an edge-computing deployment or a custom GIS architecture, our systems are ready to scale with your vision.
+          </p>
+        </div>
 
-          <div class="d-grid d-sm-flex justify-content-sm-center gap-3">
-            <a href="mailto:info@mte.com" class="btn btn-primary btn-lg px-5 fw-bold shadow-sm">
-              INITIALIZE PROJECT <i class="fa-solid fa-terminal ms-2"></i>
-            </a>
-            <a href="#" class="btn btn-outline-light btn-lg px-5 fw-bold">
-              VIEW CAPABILITIES
-            </a>
-          </div>
-
-          <div class="mt-5 pt-4 border-top border-secondary opacity-50">
-            <div class="row g-3 small font-monospace">
-              <div class="col-6 col-md-3">LATENCY: < 24ms</div>
-                  <div class="col-6 col-md-3">ENCRYPTION: AES-256</div>
-                  <div class="col-6 col-md-3">STATUS: ENCRYPTED</div>
-                  <div class="col-6 col-md-3">LOC: 0.0.0.0</div>
-              </div>
-            </div>
+        <div class="d-grid d-sm-flex justify-content-sm-center gap-3">
+          <a href="mailto:info@mte.com" class="btn btn-primary btn-lg px-5 fw-bold shadow-sm">
+            INITIALIZE PROJECT <i class="fa-solid fa-terminal ms-2"></i>
+          </a>
+          <a href="#" class="btn btn-outline-light btn-lg px-5 fw-bold">
+            VIEW CAPABILITIES
+          </a>
+        </div>
+        
+        <div class="mt-5 pt-4 border-top border-secondary opacity-50">
+          <div class="row g-3 small font-monospace">
+            <div class="col-6 col-md-3">LATENCY: < 24ms</div>
+            <div class="col-6 col-md-3">ENCRYPTION: AES-256</div>
+            <div class="col-6 col-md-3">STATUS: ENCRYPTED</div>
+            <div class="col-6 col-md-3">LOC: 0.0.0.0</div>
           </div>
         </div>
       </div>
-  </section>
-
-  <footer class="py-4 bg-dark text-light border-top border-secondary">
-    <div class="container text-center">
-      <p class="mb-1 fw-bold">MTE – Cyber‑Physical Systems</p>
-      <small class="opacity-50">Embedded • IoT • GIS • Custom Software Architecture</small>
     </div>
-  </footer>
+  </div>
+</section>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<footer class="py-4 bg-dark text-light border-top border-secondary">
+  <div class="container text-center">
+    <p class="mb-1 fw-bold">MTE – Cyber‑Physical Systems</p>
+    <small class="opacity-50">Embedded • IoT • GIS • Custom Software Architecture</small>
+  </div>
+</footer>
 
-  <script>
-    setInterval(() => {
-      document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
-    }, 1000);
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  setInterval(() => {
+  document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
+}, 1000);
 
 
 
-    // ADD THIS INSIDE YOUR <script> TAG
-    let scrollPos = 0;
-    window.addEventListener('scroll', () => {
-      scrollPos = window.pageYOffset;
-
-      requestAnimationFrame(() => {
-        document.querySelectorAll('.parallax-img').forEach(img => {
-          const speed = parseFloat(img.getAttribute('data-speed'));
-          // Math: Current scroll * speed = how much the image "offsets"
-          const yPos = (scrollPos * speed);
-
-          const rotation = img.style.transform.includes('rotate')
-            ? img.style.transform.match(/rotate\(([^)]+)\)/)[0]
-            : 'rotate(0deg)';
-
-          // translate3d uses GPU acceleration for jitter-free movement
-          img.style.transform = `translate3d(0, ${yPos}px, 0) ${rotation}`;
-        });
-      });
+// ADD THIS INSIDE YOUR <script> TAG
+let scrollPos = 0;
+window.addEventListener('scroll', () => {
+  scrollPos = window.pageYOffset;
+  
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.parallax-img').forEach(img => {
+      const speed = parseFloat(img.getAttribute('data-speed'));
+      // Math: Current scroll * speed = how much the image "offsets"
+      const yPos = (scrollPos * speed);
+      
+      const rotation = img.style.transform.includes('rotate') 
+        ? img.style.transform.match(/rotate\(([^)]+)\)/)[0] 
+        : 'rotate(0deg)';
+      
+      // translate3d uses GPU acceleration for jitter-free movement
+      img.style.transform = `translate3d(0, ${yPos}px, 0) ${rotation}`;
     });
+  });
+});
 
-    const builtSystems = [
-      {
-        title: 'SafeSail Tracker',
-        desc: 'Emergency tracking for water transport safety.',
-        tags: ['Embedded', 'IoT'],
-        link: 'projects/safesail/index.html',
-        specs: { "Controller": "ESP32-S3", "Radio": "LoRaWAN / GSM", "Power": "Solar-Buffered Li-Ion" }
-      },
-      {
-        title: 'BF‑4™ Biogas System',
-        desc: 'Household waste‑to‑energy solution.',
-        tags: ['Energy', 'Sustainability'],
-        link: 'projects/biogas/index.html',
-        specs: { "Volume": "4 cubic meters", "Sensors": "Pressure, Temp, CH4", "Alerts": "SMS Gateway" }
-      },
-      {
-        title: 'Mini Weather Station',
-        desc: 'Environmental monitoring & early warnings.',
-        tags: ['Sensors', 'Data'],
-        link: 'projects/weather/index.html',
-        specs: { "Accuracy": "±0.3°C", "Log Interval": "15 Minutes", "Transmission": "WiFi / MQTT" }
-      }
-    ];
+const builtSystems = [
+  { 
+    title: 'SafeSail Tracker', 
+    desc: 'Emergency tracking for water transport safety.', 
+    tags: ['Embedded', 'IoT'], 
+    link: 'projects/safesail/index.html',
+    specs: { "Controller": "ESP32-S3", "Radio": "LoRaWAN / GSM", "Power": "Solar-Buffered Li-Ion" } 
+  },
+  { 
+    title: 'BF‑4™ Biogas System', 
+    desc: 'Household waste‑to‑energy solution.', 
+    tags: ['Energy', 'Sustainability'], 
+    link: 'projects/biogas/index.html',
+    specs: { "Volume": "4 cubic meters", "Sensors": "Pressure, Temp, CH4", "Alerts": "SMS Gateway" } 
+  },
+  { 
+    title: 'Mini Weather Station', 
+    desc: 'Environmental monitoring & early warnings.', 
+    tags: ['Sensors', 'Data'], 
+    link: 'projects/weather/index.html',
+    specs: { "Accuracy": "±0.3°C", "Log Interval": "15 Minutes", "Transmission": "WiFi / MQTT" } 
+  }
+];
 
-    const ideasSystems = [
-      {
-        title: 'LoRa Mesh Agriculture',
-        desc: 'Distributed peer‑to‑peer farm intelligence.',
-        tags: ['R&D', 'AgriTech'],
-        link: 'ideas/lora-agri/index.html',
-        specs: { "Topology": "Dynamic Mesh", "Range": "5km per node", "Protocol": "LoRa Layer 2" }
-      },
-      {
-        title: 'GIS → 3D Simulation',
-        desc: 'Geospatial data into interactive 3D spaces.',
-        tags: ['GIS', 'Simulation'],
-        link: 'ideas/gis-3d/index.html',
-        specs: { "Engine": "Three.js / WebGL", "Input": "GeoJSON / LiDAR", "Processing": "Serverless AWS" }
-      },
-      {
-        title: 'School Weather Network',
-        desc: 'Inter‑school sensor data sharing platform.',
-        tags: ['Network', 'Education'],
-        link: 'ideas/school-net/index.html',
-        specs: { "API": "GraphQL", "Nodes": "Raspberry Pi Zero 2W", "Security": "JWT Authentication" }
-      }
-    ];
+const ideasSystems = [
+  { 
+    title: 'LoRa Mesh Agriculture', 
+    desc: 'Distributed peer‑to‑peer farm intelligence.', 
+    tags: ['R&D', 'AgriTech'], 
+    link: 'ideas/lora-agri/index.html',
+    specs: { "Topology": "Dynamic Mesh", "Range": "5km per node", "Protocol": "LoRa Layer 2" } 
+  },
+  { 
+    title: 'GIS → 3D Simulation', 
+    desc: 'Geospatial data into interactive 3D spaces.', 
+    tags: ['GIS', 'Simulation'], 
+    link: 'ideas/gis-3d/index.html',
+    specs: { "Engine": "Three.js / WebGL", "Input": "GeoJSON / LiDAR", "Processing": "Serverless AWS" } 
+  },
+  { 
+    title: 'School Weather Network', 
+    desc: 'Inter‑school sensor data sharing platform.', 
+    tags: ['Network', 'Education'], 
+    link: 'ideas/school-net/index.html',
+    specs: { "API": "GraphQL", "Nodes": "Raspberry Pi Zero 2W", "Security": "JWT Authentication" } 
+  }
+];
 
-    const tagStyles = {
-      'Embedded': { class: 'bg-primary text-white', icon: 'fa-microchip' },
-      'IoT': { class: 'bg-info text-dark', icon: 'fa-rss' },
-      'Energy': { class: 'bg-success text-white', icon: 'fa-bolt' },
-      'Sustainability': { class: 'bg-warning text-dark', icon: 'fa-leaf' },
-      'Sensors': { class: 'bg-danger text-white', icon: 'fa-gauge-high' },
-      'R&D': { class: 'bg-dark text-white', icon: 'fa-flask' },
-      'AgriTech': { class: 'bg-success text-white', icon: 'fa-seedling' },
-      'GIS': { class: 'bg-primary text-white', icon: 'fa-map-location-dot' },
-      'Data': { class: 'bg-secondary text-white', icon: 'fa-database' },
-      'Network': { class: 'bg-info text-dark', icon: 'fa-network-wired' },
-      'Education': { class: 'bg-light text-dark border', icon: 'fa-graduation-cap' }
-    };
+const tagStyles = {
+  'Embedded': { class: 'bg-primary text-white', icon: 'fa-microchip' },
+  'IoT': { class: 'bg-info text-dark', icon: 'fa-rss' },
+  'Energy': { class: 'bg-success text-white', icon: 'fa-bolt' },
+  'Sustainability': { class: 'bg-warning text-dark', icon: 'fa-leaf' },
+  'Sensors': { class: 'bg-danger text-white', icon: 'fa-gauge-high' },
+  'R&D': { class: 'bg-dark text-white', icon: 'fa-flask' },
+  'AgriTech': { class: 'bg-success text-white', icon: 'fa-seedling' },
+  'GIS': { class: 'bg-primary text-white', icon: 'fa-map-location-dot' },
+  'Data': { class: 'bg-secondary text-white', icon: 'fa-database' },
+  'Network': { class: 'bg-info text-dark', icon: 'fa-network-wired' },
+  'Education': { class: 'bg-light text-dark border', icon: 'fa-graduation-cap' }
+};
 
-    
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
+}, { threshold: 0.1 });
 
-    const modalEl = document.getElementById('specsModal');
-    modalEl.addEventListener('show.bs.modal', () => document.querySelectorAll('.scroll-track').forEach(t => t.classList.add('stop-scroll')));
-    modalEl.addEventListener('hidden.bs.modal', () => document.querySelectorAll('.scroll-track').forEach(t => t.classList.remove('stop-scroll')));
+const modalEl = document.getElementById('specsModal');
+modalEl.addEventListener('show.bs.modal', () => document.querySelectorAll('.scroll-track').forEach(t => t.classList.add('stop-scroll')));
+modalEl.addEventListener('hidden.bs.modal', () => document.querySelectorAll('.scroll-track').forEach(t => t.classList.remove('stop-scroll')));
 
-    function openSpecs(title, specsJson) {
-      const specs = JSON.parse(decodeURIComponent(specsJson));
-      document.getElementById('modalTitle').innerText = `${title} // Technical Data`;
-      let html = `<div class="table-responsive"><table class="table table-sm border-0"><tbody>`;
-      for (const [key, value] of Object.entries(specs)) {
-        html += `<tr><td class="fw-bold text-muted text-uppercase py-2" style="font-size: 0.7rem;">${key}</td><td class="font-monospace py-2">${value}</td></tr>`;
-      }
-      html += `</tbody></table></div>`;
-      document.getElementById('modalContent').innerHTML = html;
-      new bootstrap.Modal(modalEl).show();
-    }
+function openSpecs(title, specsJson) {
+  const specs = JSON.parse(decodeURIComponent(specsJson));
+  document.getElementById('modalTitle').innerText = `${title} // Technical Data`;
+  let html = `<div class="table-responsive"><table class="table table-sm border-0"><tbody>`;
+  for (const [key, value] of Object.entries(specs)) {
+    html += `<tr><td class="fw-bold text-muted text-uppercase py-2" style="font-size: 0.7rem;">${key}</td><td class="font-monospace py-2">${value}</td></tr>`;
+  }
+  html += `</tbody></table></div>`;
+  document.getElementById('modalContent').innerHTML = html;
+  new bootstrap.Modal(modalEl).show();
+}
 
-    function renderCards(container, systems, isBuilt = false) {
-      container.innerHTML = '';
-      if (!systems || systems.length === 0) return;
-      let displayList = [...systems];
-      while (displayList.length < 12) displayList = [...displayList, ...systems];
+function renderCards(container, systems, isBuilt = false) {
+  container.innerHTML = '';
+  if (!systems || systems.length === 0) return;
+  let displayList = [...systems];
+  while (displayList.length < 12) displayList = [...displayList, ...systems];
 
-      displayList.forEach(system => {
-        const card = document.createElement('div');
-        card.className = 'card shadow-sm h-100';
-        const tagsHtml = system.tags ? system.tags.map(t => {
-          const style = tagStyles[t] || { class: 'bg-light text-dark border', icon: 'fa-tag' };
-          return `<span class="badge ${style.class} tag me-1"><i class="fa-solid ${style.icon} me-1"></i>${t}</span>`;
-        }).join('') : '';
-        const specsData = encodeURIComponent(JSON.stringify(system.specs || {}));
+  displayList.forEach(system => {
+    const card = document.createElement('div');
+    card.className = 'card shadow-sm h-100';
+    const tagsHtml = system.tags ? system.tags.map(t => {
+      const style = tagStyles[t] || { class: 'bg-light text-dark border', icon: 'fa-tag' };
+      return `<span class="badge ${style.class} tag me-1"><i class="fa-solid ${style.icon} me-1"></i>${t}</span>`;
+    }).join('') : '';
+    const specsData = encodeURIComponent(JSON.stringify(system.specs || {}));
 
-        card.innerHTML = `
+    card.innerHTML = `
       <div class="card-body d-flex flex-column">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="text-uppercase text-muted fw-bold m-0" style="font-size: 0.6rem; letter-spacing: 1px;">
@@ -683,288 +589,40 @@
         </div>
       </div>
     `;
-        container.appendChild(card);
-        observer.observe(card);
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const builtTrack = document.getElementById('built-track');
-      const ideasTrack = document.getElementById('ideas-track');
-
-      renderCards(builtTrack, builtSystems, true);
-      renderCards(ideasTrack, ideasSystems, false);
-
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const parentBar = e.target.closest('.filter-bar');
-          const targetType = parentBar.dataset.target;
-          const tag = btn.dataset.tag;
-
-          parentBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-
-          const track = targetType === 'built' ? builtTrack : ideasTrack;
-          const dataSet = targetType === 'built' ? builtSystems : ideasSystems;
-          const filtered = tag === 'all' ? dataSet : dataSet.filter(s => s.tags.includes(tag));
-
-          track.style.animation = 'none';
-          renderCards(track, filtered, targetType === 'built');
-          setTimeout(() => track.style.animation = '', 10);
-        });
-      });
-      // Trigger one scroll event to position parallax items correctly on load
-      window.dispatchEvent(new Event('scroll'));
-    });
-  </script>
-
-</body>
-
-</html>
-background-color: #f8f9fa;
-background-image:
-linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
-background-size: 30px 30px;
+    container.appendChild(card);
+    observer.observe(card);
+  });
 }
 
-/* ===== Animated Scroll Rows ===== */
-.scroll-row {
-overflow: hidden;
-position: relative;
-padding: 1.5rem 0;
-}
+document.addEventListener('DOMContentLoaded', () => {
+  const builtTrack = document.getElementById('built-track');
+  const ideasTrack = document.getElementById('ideas-track');
+  
+  renderCards(builtTrack, builtSystems, true);
+  renderCards(ideasTrack, ideasSystems, false);
 
-.scroll-row::before, .scroll-row::after {
-content: "";
-position: absolute;
-top: 0;
-width: 120px;
-height: 100%;
-z-index: 2;
-pointer-events: none;
-}
-.scroll-row::before { left: 0; background: linear-gradient(to right, #f8f9fa, transparent); }
-.scroll-row::after { right: 0; background: linear-gradient(to left, #f8f9fa, transparent); }
-
-.scroll-track {
-display: flex;
-gap: 1.5rem;
-width: max-content;
-animation: scroll-left 45s linear infinite;
-}
-
-.scroll-track.reverse { animation: scroll-right 50s linear infinite; }
-.scroll-row:hover .scroll-track { animation-play-state: paused; }
-
-@keyframes scroll-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@keyframes scroll-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
-
-/* Tech-style card polish */
-.card {
-min-width: 320px;
-border: 1px solid rgba(0,0,0,0.08);
-border-left: 4px solid #212529 !important;
-background: rgba(255, 255, 255, 0.9);
-backdrop-filter: blur(8px);
-transition: all 0.3s ease;
-opacity: 0;
-transform: translateY(30px);
-}
-
-.card.in-view { opacity: 1; transform: translateY(0); }
-.card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
-
-/* Modal Styling */
-.modal-content {
-background-image: linear-gradient(rgba(0, 0, 0, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.02)
-1px, transparent 1px);
-background-size: 15px 15px;
-}
-
-/* Status Pulse */
-.status-pulse {
-display: inline-block;
-width: 8px;
-height: 8px;
-background: #28a745;
-border-radius: 50%;
-margin-right: 6px;
-animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-70% { box-shadow: 0 0 0 8px rgba(40, 167, 69, 0); }
-100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-}
-
-.tag { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-
-.social-nav {
-position: fixed; top: 50%; right: 15px; transform: translateY(-50%);
-display: flex; flex-direction: column; gap: 10px; z-index: 1000;
-}
-.social-nav a {
-width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-background: #212529; color: #fff; border-radius: 50%; text-decoration: none; transition: 0.3s;
-}
-.social-nav a:hover { background: #007bff; transform: translateX(-5px); }
-</style>
-</head>
-
-<body>
-
-  <div class="social-nav">
-    <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-    <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
-    <a href="mailto:info@mte.com" title="Email"><i class="fa-solid fa-envelope"></i></a>
-  </div>
-
-  <nav class="navbar navbar-dark bg-dark">
-    <div class="container">
-      <span class="navbar-brand fw-bold">MTE</span>
-      <span class="navbar-text text-light d-none d-md-block">Intelligence Architects & Systems Integrators</span>
-    </div>
-  </nav>
-
-  <section class="py-5">
-    <div class="container text-center">
-      <h1 class="fw-bold display-5">MeetTheExperts (MTE)</h1>
-      <p class="lead text-muted mx-auto" style="max-width: 700px;">
-        Engineering the intersection of physical infrastructure and digital intelligence.
-      </p>
-    </div>
-  </section>
-
-  <section id="built-systems" class="py-5">
-    <div class="container-fluid">
-      <div class="d-flex justify-content-between align-items-end mb-3 px-4">
-        <h3 class="fw-bold m-0">Built Systems</h3>
-        <div class="filter-bar d-flex gap-2">
-          <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Embedded">Embedded</button>
-          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="IoT">IoT</button>
-        </div>
-      </div>
-      <div class="scroll-row">
-        <div class="scroll-track" id="built-track"></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="ideas" class="py-5">
-    <div class="container-fluid">
-      <h3 class="mb-3 ps-4 fw-bold">R&D / Experimental</h3>
-      <div class="scroll-row">
-        <div class="scroll-track reverse" id="ideas-track"></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="modal fade" id="specsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header bg-dark text-white border-0">
-          <h5 class="modal-title fw-bold" id="modalTitle">System Specifications</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body p-4" id="modalContent"></div>
-        <div class="modal-footer border-0">
-          <button type="button" class="btn btn-outline-dark w-100 fw-bold" data-bs-dismiss="modal">CLOSE
-            ARCHIVE</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <footer class="py-4 bg-dark text-light border-top border-secondary">
-    <div class="container text-center">
-      <p class="mb-1 fw-bold">MTE – Cyber‑Physical Systems</p>
-      <small class="opacity-50">Embedded • IoT • GIS • Custom Software Architecture</small>
-    </div>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script>
-    
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const parentBar = e.target.closest('.filter-bar');
+      const targetType = parentBar.dataset.target;
+      const tag = btn.dataset.tag;
       
+      parentBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
 
-    
-
-    
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
-    }, { threshold: 0.2 });
-
-    function openSpecs(title, specsJson) {
-      const specs = JSON.parse(decodeURIComponent(specsJson));
-      document.getElementById('modalTitle').innerText = `${title} // Technical Data`;
-      let html = `<div class="table-responsive"><table class="table table-sm border-0"><tbody>`;
-      for (const [key, value] of Object.entries(specs)) {
-        html += `<tr><td class="fw-bold text-muted text-uppercase py-2" style="font-size: 0.7rem;">${key}</td><td class="font-monospace py-2">${value}</td></tr>`;
-      }
-      html += `</tbody></table></div>`;
-      document.getElementById('modalContent').innerHTML = html;
-      new bootstrap.Modal(document.getElementById('specsModal')).show();
-    }
-
-    function renderCards(container, systems, isBuilt = false) {
-      container.innerHTML = '';
-      if (!systems || systems.length === 0) return;
-      let displayList = [...systems];
-      while (displayList.length < 12) displayList = [...displayList, ...systems];
-
-      displayList.forEach(system => {
-        const card = document.createElement('div');
-        card.className = 'card shadow-sm h-100';
-        const tagsHtml = system.tags ? system.tags.map(t => {
-          const style = tagStyles[t] || { class: 'bg-light text-dark border', icon: 'fa-tag' };
-          return `<span class="badge ${style.class} tag me-1"><i class="fa-solid ${style.icon} me-1"></i>${t}</span>`;
-        }).join('') : '';
-        const specsData = encodeURIComponent(JSON.stringify(system.specs || {}));
-
-        card.innerHTML = `
-      <div class="card-body d-flex flex-column">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="text-uppercase text-muted fw-bold m-0" style="font-size: 0.6rem; letter-spacing: 1px;">
-            ${isBuilt ? '<span class="status-pulse"></span>Deployed System' : '<i class="fa-solid fa-flask me-1"></i>Experimental'}
-          </h6>
-          <small class="text-muted" style="font-size: 0.6rem; font-family: monospace;">REF_${Math.random().toString(36).substr(2, 5).toUpperCase()}</small>
-        </div>
-        <h5 class="card-title fw-bold mb-1">${system.title}</h5>
-        <hr class="my-2 opacity-10">
-        <p class="card-text text-muted small flex-grow-1">${system.desc}</p>
-        <div class="mt-2 mb-3">${tagsHtml}</div>
-        <button onclick="openSpecs('${system.title}', '${specsData}')" class="btn btn-sm ${isBuilt ? 'btn-dark' : 'btn-outline-dark'} w-100 fw-bold">
-          ${isBuilt ? 'SYSTEM SPECS' : 'VIEW PROPOSAL'}
-        </button>
-      </div>
-    `;
-        container.appendChild(card);
-        observer.observe(card);
-      });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderCards(document.getElementById('built-track'), builtSystems, true);
-      renderCards(document.getElementById('ideas-track'), ideasSystems, false);
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const tag = btn.dataset.tag;
-          const filtered = tag === 'all' ? builtSystems : builtSystems.filter(s => s.tags.includes(tag));
-          const builtTrack = document.getElementById('built-track');
-          builtTrack.style.animation = 'none';
-          renderCards(builtTrack, filtered, true);
-          setTimeout(() => { builtTrack.style.animation = ''; }, 10);
-        });
-      });
+      const track = targetType === 'built' ? builtTrack : ideasTrack;
+      const dataSet = targetType === 'built' ? builtSystems : ideasSystems;
+      const filtered = tag === 'all' ? dataSet : dataSet.filter(s => s.tags.includes(tag));
+      
+      track.style.animation = 'none';
+      renderCards(track, filtered, targetType === 'built');
+      setTimeout(() => track.style.animation = '', 10);
     });
-  </script>
+  });
+  // Trigger one scroll event to position parallax items correctly on load
+window.dispatchEvent(new Event('scroll'));
+});
+</script>
 
 </body>
-
 </html>
