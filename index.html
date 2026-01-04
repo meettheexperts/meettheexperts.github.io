@@ -377,24 +377,17 @@
     }
 
     .intelligent-title {
-      /* Responsive font size: min 1.5rem, scales with viewport, max 3rem */
-      font-size: clamp(1.5rem, 5vw, 3rem);
+  font-size: clamp(1.2rem, 5vw, 3rem); /* scales with viewport */
+  line-height: 1.2;
+  text-align: center;
+  margin: 1rem auto;
+  padding: 0 1rem;
 
-      /* Make text wrap nicely on small screens */
-      word-wrap: break-word;
-      line-height: 1.2;
-      /* tighter spacing for long titles */
-
-      /* Centered text always */
-      text-align: center;
-
-      /* Optional: spacing around */
-      margin: 1rem auto;
-      padding: 0 1rem;
-
-      /* Ensure it doesn’t overflow */
-      overflow-wrap: break-word;
-    }
+  /* Allow wrapping between words only */
+  word-break: normal;      /* prevents breaking inside words */
+  overflow-wrap: normal;   /* also prevents breaking words */
+  white-space: normal;     /* allows normal wrapping */
+}
 
     @keyframes fadeInDown {
       from {
