@@ -357,12 +357,7 @@
 
 
 
-    #hero h1 {
-      font-size: 4rem;
-      letter-spacing: 2px;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-      animation: fadeInDown 1s ease-out;
-    }
+    
 
     #hero p {
       font-size: 1.25rem;
@@ -377,25 +372,6 @@
     }
 
     
-.intelligent-title {
-  font-size: clamp(1rem, 5vw, 3rem); /* smaller min to fit tiny screens */
-  line-height: 1.2;
-  text-align: center;
-  margin: 1rem auto;
-  padding: 0 1rem;
-
-  /* Prevent overflowing container */
-  max-width: 100%;
-  box-sizing: border-box;
-
-  /* Wrap between words normally */
-  word-break: normal;
-  overflow-wrap: anywhere; /* allows breaking only if necessary */
-  white-space: normal;
-
-  /* Optional: smooth text scaling on very small screens */
-  hyphens: auto; 
-}
 
 
 
@@ -654,9 +630,16 @@
     <div class="container position-relative">
       <span class="fw-bold text-uppercase d-block mb-3"
         style="letter-spacing: 6px; font-size: 1rem; opacity: 0.8;">MeetTheExperts Engineering</span>
-      <h1 class="intelligent-title fw-bold text-uppercase text-center mx-auto">
+      
+        <h1 class="fw-bold text-uppercase text-center mx-auto fs-1 fs-md-2 fs-lg-3" 
+    style="letter-spacing:1px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); animation: fadeInDown 1s ease-out;">
   Intelligence Architects & Systems Integrators
 </h1>
+
+
+
+
+
       <p class="lead mx-auto mb-4">
         Engineering the intersection of physical infrastructure and digital intelligence.
       </p>
