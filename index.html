@@ -376,18 +376,28 @@
       animation: fadeInUp 1s ease-out 0.6s both;
     }
 
-    .intelligent-title {
-  font-size: clamp(1.2rem, 3vw, 2rem); /* scales with viewport */
+    
+.intelligent-title {
+  font-size: clamp(1rem, 5vw, 3rem); /* smaller min to fit tiny screens */
   line-height: 1.2;
   text-align: center;
   margin: 1rem auto;
   padding: 0 1rem;
 
-  /* Allow wrapping between words only */
-  word-break: normal;      /* prevents breaking inside words */
-  overflow-wrap: normal;   /* also prevents breaking words */
-  white-space: normal;     /* allows normal wrapping */
+  /* Prevent overflowing container */
+  max-width: 100%;
+  box-sizing: border-box;
+
+  /* Wrap between words normally */
+  word-break: normal;
+  overflow-wrap: anywhere; /* allows breaking only if necessary */
+  white-space: normal;
+
+  /* Optional: smooth text scaling on very small screens */
+  hyphens: auto; 
 }
+
+
 
     @keyframes fadeInDown {
       from {
@@ -645,8 +655,8 @@
       <span class="fw-bold text-uppercase d-block mb-3"
         style="letter-spacing: 6px; font-size: 1rem; opacity: 0.8;">MeetTheExperts Engineering</span>
       <h1 class="intelligent-title fw-bold text-uppercase text-center mx-auto">
-        Intelligence Architects & Systems Integrators
-      </h1>
+  Intelligence Architects & Systems Integrators
+</h1>
       <p class="lead mx-auto mb-4">
         Engineering the intersection of physical infrastructure and digital intelligence.
       </p>
