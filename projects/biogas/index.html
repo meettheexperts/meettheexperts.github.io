@@ -1,17 +1,505 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>BF‑4™ Biogas System - MTE</title>
+  <title>System Dossier | Community Biogas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    :root {
+      --mte-blue: #007bff;
+      --mte-dark: #212529;
+      --mte-future: #6610f2;
+      --mte-success: #28a745;
+    }
+
+    body {
+      background-color: #f8f9fa;
+      background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      overflow-x: hidden;
+    }
+
+    /* Core Utility Elements */
+    .scan-line {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--mte-blue);
+      z-index: 10000;
+      transform: scaleX(0);
+      transform-origin: left;
+    }
+
+    .grain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.03;
+      background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grain_Noise.jpg');
+    }
+
+    /* Hero & Blueprint Header */
+    .project-hero {
+      padding: 80px 0 40px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .blueprint-header {
+      border-left: 5px solid var(--mte-dark);
+      padding-left: 2rem;
+      opacity: 0;
+      /* Initial position handled by GSAP fromTo for reliability */
+    }
+
+    /* Cards & Boxes - Decoupled from CSS transitions to prevent GSAP stutter */
+    .benefit-card {
+      background: white;
+      border-radius: 4px;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    .benefit-card:hover {
+      transform: translateY(-5px) !important;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .spec-box {
+      background: white;
+      border: 1px solid #dee2e6;
+      padding: 20px;
+      border-top: 3px solid var(--mte-blue);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    .spec-box.future {
+      border-top-color: var(--mte-future);
+      background: #fdfbff;
+    }
+
+    /* Parallax Functionality */
+    .parallax-window {
+      overflow: hidden;
+      position: relative;
+      height: 400px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      background: #e9ecef;
+    }
+
+    .parallax-img {
+      width: 100%;
+      height: 130%; /* Excess height provides the "bleed" for movement */
+      object-fit: cover;
+      position: absolute;
+      top: -15%; /* Centers the taller image in the window */
+      left: 0;
+      will-change: transform;
+      filter: grayscale(100%);
+      transition: filter 0.6s ease;
+    }
+
+    .parallax-window:hover .parallax-img {
+      filter: grayscale(0%);
+    }
+
+    /* Parallax Background Layer */
+    .parallax-bg-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 120%; /* Taller than the viewport */
+      z-index: -1; /* Sits behind all content */
+      overflow: hidden;
+      pointer-events: none; /* Allows clicking on content above it */
+    }
+
+    .parallax-bg-image {
+      width: 100%;
+      height: 100%;
+      background-image: url('https://i.postimg.cc/9MzvYpCW/biogas.png'); /* Replace with your blueprint/texture */
+      background-size: cover;
+      background-position: center;
+      opacity: 0.09; /* Keeps it subtle like a watermark */
+      filter: contrast(120%) grayscale(100%);
+      will-change: transform;
+    }
+
+    /* Technical UI Elements */
+    .science-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid #eee;
+      border-left: 3px solid #495057;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: 0.3s ease;
+    }
+
+    .science-card:hover {
+      background: white;
+      transform: translateX(5px);
+    }
+
+    .code-window {
+      background: #1a1d20;
+      color: #a5d6ff;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      border-left: 4px solid var(--mte-future);
+    }
+
+    .status-tag {
+      font-family: monospace;
+      font-size: 0.65rem;
+      border: 1px solid #28a745;
+      color: #28a745;
+      padding: 2px 8px;
+      text-transform: uppercase;
+    }
+
+    .status-tag.roadmap {
+      border-color: var(--mte-future);
+      color: var(--mte-future);
+    }
+
+    /* Image Gallery - Opacity 0 ensures GSAP can fade them in cleanly */
+    .gallery-img {
+      filter: grayscale(100%);
+      border: 1px solid #ddd;
+      transition: filter 0.5s ease, transform 0.5s ease;
+      opacity: 0;
+    }
+
+    .gallery-img:hover {
+      filter: grayscale(0%);
+      transform: scale(1.02);
+    }
+</style>
 </head>
+
 <body>
-  <div class="container mt-5">
-    <h1>BF‑4™ Biogas System</h1>
-    <p>Household waste‑to‑energy solution.</p>
-    <p>Energy and sustainability focused system for converting waste into biogas.</p>
-    <a href="../../index.html" class="btn btn-primary">Back to Home</a>
-  </div>
+<div class="parallax-bg-container">
+    <div class="parallax-bg-image" id="globalBg"></div>
+</div>
+  <div class="scan-line" id="scanLine"></div>
+  <div class="grain"></div>
+
+  <nav class="container pt-4">
+    <a href="../../index.html" class="text-decoration-none text-dark font-monospace fw-bold small opacity-75">
+      <i class="fa-solid fa-terminal me-2"></i>RETURN_TO_SYSTEM_INDEX
+    </a>
+  </nav>
+
+  <section class="project-hero">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <div class="blueprint-header" id="heroText">
+            <div class="d-flex gap-2 mb-2">
+              <span class="status-tag">Physical_Structure_Verified</span>
+              <span class="status-tag roadmap">Smart_Safety_Roadmap_Active</span>
+            </div>
+            <h1 class="display-4 fw-bold">BF‑4™ Biogas System</h1>
+            <p class="lead text-muted">A sustainable energy solution that turns organic waste into clean fuel and
+              premium fertilizer for the modern household.</p>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="parallax-window shadow-lg gallery-img">
+            <img src="https://i.postimg.cc/9MzvYpCW/biogas.png" class="parallax-img" id="heroParallax"
+              alt="BF-4 Biogas System">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container my-5" id="benefits">
+    <div class="row g-4 text-center">
+      <div class="col-md-4">
+        <div class="benefit-card p-4 shadow-sm border-bottom border-3 border-success">
+          <i class="fa-solid fa-leaf text-success mb-3 fa-2x"></i>
+          <h5 class="fw-bold">Zero Waste Cooking</h5>
+          <p class="small text-muted mb-0">Transform 2kg of daily kitchen scraps into 2+ hours of odorless, smokeless
+            cooking gas.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="benefit-card p-4 shadow-sm border-bottom border-3 border-primary">
+          <i class="fa-solid fa-shield-halved text-primary mb-3 fa-2x"></i>
+          <h5 class="fw-bold">Safe & Reliable</h5>
+          <p class="small text-muted mb-0">Low-pressure storage is safer than LPG cylinders, with multiple natural and
+            smart fail-safes.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="benefit-card p-4 shadow-sm border-bottom border-3 border-warning">
+          <i class="fa-solid fa-faucet-drip text-warning mb-3 fa-2x"></i>
+          <h5 class="fw-bold">Liquid Gold</h5>
+          <p class="small text-muted mb-0">Produce a nutrient-rich organic fertilizer byproduct, perfect for replacing
+            chemical garden feeds.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container my-5">
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="spec-box">
+          <h6 class="fw-bold small text-uppercase opacity-50">Reactor</h6>
+          <p class="font-monospace mb-0 small fw-bold">HDPE Polymer Tank</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="spec-box">
+          <h6 class="fw-bold small text-uppercase opacity-50">Storage</h6>
+          <p class="font-monospace mb-0 small fw-bold">High-Elasticity Tube</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="spec-box future">
+          <h6 class="fw-bold small text-uppercase opacity-50 text-primary">Intelligence</h6>
+          <p class="font-monospace mb-0 small fw-bold">ESP32 / BME280</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="spec-box future">
+          <h6 class="fw-bold small text-uppercase opacity-50 text-primary">Safety Gate</h6>
+          <p class="font-monospace mb-0 small fw-bold">SG90 Servo Vent</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="container mb-5">
+    <div class="row g-5">
+      <div class="col-lg-7">
+        <h4 class="fw-bold mb-4 text-uppercase small" style="letter-spacing: 2px;">01_Operational_Lifecycle</h4>
+        <p class="small text-muted">Unlike industrial energy systems, our digester is designed for intuitive household
+          use.</p>
+
+        <div class="p-4 border bg-white mb-4">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <ul class="list-unstyled mb-0">
+                <li class="mb-3 d-flex align-items-center">
+                  <span class="fa-stack small me-2 text-primary">
+                    <i class="fa-solid fa-circle fa-stack-2x"></i>
+                    <strong class="fa-stack-1x fa-inverse" style="font-size: 0.8rem;">1</strong>
+                  </span>
+                  <span><strong>Input:</strong> Add kitchen waste and water.</span>
+                </li>
+
+                <li class="mb-3 d-flex align-items-center">
+                  <span class="fa-stack small me-2 text-primary">
+                    <i class="fa-solid fa-circle fa-stack-2x"></i>
+                    <strong class="fa-stack-1x fa-inverse" style="font-size: 0.8rem;">2</strong>
+                  </span>
+                  <span><strong>Process:</strong> Natural bacteria convert waste to gas.</span>
+                </li>
+
+                <li class="mb-0 d-flex align-items-center">
+                  <span class="fa-stack small me-2 text-primary">
+                    <i class="fa-solid fa-circle fa-stack-2x"></i>
+                    <strong class="fa-stack-1x fa-inverse" style="font-size: 0.8rem;">3</strong>
+                  </span>
+                  <span><strong>Output:</strong> Clean flame for cooking.</span>
+                </li>
+              </ul>
+            </div>
+            <div class="col-md-6">
+              <img src="YOUR_SYSTEM_PHOTO.jpg" class="img-fluid gallery-img rounded shadow-sm" alt="BF-4 Physical Unit">
+            </div>
+          </div>
+        </div>
+
+        <h4 class="fw-bold mt-5 mb-4 text-uppercase small" style="letter-spacing: 2px;">02_Science_&_Safety_Assurance
+        </h4>
+        <div class="accordion accordion-flush border" id="techAccordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed fw-bold font-monospace small" type="button"
+                data-bs-toggle="collapse" data-bs-target="#c1">
+                THE_BIOLOGICAL_PHASES
+              </button>
+            </h2>
+            <div id="c1" class="accordion-collapse collapse" data-bs-parent="#techAccordion">
+              <div class="accordion-body">
+                <div class="row g-2">
+                  <div class="col-6">
+                    <div class="science-card small">1. HYDROLYSIS</div>
+                  </div>
+                  <div class="col-6">
+                    <div class="science-card small">2. ACIDOGENESIS</div>
+                  </div>
+                  <div class="col-6">
+                    <div class="science-card small">3. ACETOGENESIS</div>
+                  </div>
+                  <div class="col-6">
+                    <div class="science-card small">4. METHANOGENESIS</div>
+                  </div>
+                </div>
+
+
+                [Image of Anaerobic Digestion Process Diagram]
+
+              </div>
+            </div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed fw-bold font-monospace small" type="button"
+                data-bs-toggle="collapse" data-bs-target="#c2">
+                ODOR_&_CORROSION_CONTROL
+              </button>
+            </h2>
+            <div id="c2" class="accordion-collapse collapse" data-bs-parent="#techAccordion">
+              <div class="accordion-body small text-muted">
+                Our <strong>Proprietary Steel-Wool Matrix</strong> sequesters Hydrogen Sulfide ($H_2S$). This ensures
+                the gas is odorless and prevents corrosion in burners, making it as clean as standard LPG.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="p-4 bg-white border h-100 shadow-sm">
+          <h5 class="fw-bold mb-4 font-monospace text-primary small">SYSTEM_INTELLIGENCE.v1</h5>
+          <p class="small text-muted mb-4">Even a simple biological process benefits from a "Digital Twin." This
+            upcoming layer provides a dashboard for safety and yield.</p>
+
+          <div class="code-window mb-4">
+            <p class="mb-1 text-secondary opacity-50">// AUTOMATED_VENTING_LOGIC</p>
+            <p class="mb-0">if (pressure > SAFETY_LIMIT) {</p>
+            <p class="mb-0">&nbsp;&nbsp;trigger_alert();</p>
+            <p class="mb-0">&nbsp;&nbsp;servo_valve.open();</p>
+            <p class="mb-0">}</p>
+          </div>
+
+          <div class="row g-2 mb-4">
+            <div class="col-6">
+              <img src="https://i.postimg.cc/RZ10fMZn/esp32.jpg" class="img-fluid gallery-img" alt="Smart Controller">
+              <p class="small text-muted font-monospace mt-1" style="font-size: 0.6rem;">UNIT_CONTROLLER_v1</p>
+            </div>
+            <div class="col-6">
+              <img src="https://i.postimg.cc/CMvrhDG3/filter.jpg" class="img-fluid gallery-img" alt="H2S Filter">
+              <p class="small text-muted font-monospace mt-1" style="font-size: 0.6rem;">H2S_PURIFIER</p>
+            </div>
+          </div>
+
+          <div class="p-3 bg-light border-start border-3 border-primary small">
+            <p class="mb-0 italic fw-bold font-monospace opacity-50">// ARCHITECTS_NOTE</p>
+            <p class="mb-0 mt-1">Every 1 $m^3$ of gas saves 5kg of charcoal. This isn't just a gadget; it's a forest
+              preservation tool.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-5 bg-dark text-light border-top border-secondary">
+    <div class="container text-center">
+      <p class="font-monospace small mb-0 opacity-50">SYSTEM_DOCUMENTATION // MTE_COMMUNITY_BIOGAS // 2026</p>
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+
+    window.addEventListener('load', () => {
+      gsap.registerPlugin(ScrollTrigger);
+
+      // 1. Initial Header Animations
+      gsap.to("#scanLine", { scaleX: 1, duration: 1.5, ease: "power4.inOut" });
+      gsap.fromTo("#heroText",
+        { opacity: 0, x: -30 },
+        { opacity: 1, x: 0, duration: 1.2, delay: 0.5 }
+      );
+
+      // 2. Benefit Cards Entrance (Static - No Parallax)
+      gsap.fromTo(".benefit-card",
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1, y: 0,
+          duration: 0.8, stagger: 0.2,
+          scrollTrigger: { trigger: "#benefits", start: "top 85%" }
+        }
+      );
+
+      // 3. Spec Boxes Entrance (Static - No Parallax to avoid shifting)
+      gsap.fromTo(".spec-box",
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1, y: 0,
+          duration: 0.8, stagger: 0.1,
+          scrollTrigger: { trigger: ".spec-box", start: "top 90%" }
+        }
+      );
+
+      // 4. Hero Image Parallax (This is safe because it's inside a container)
+      if (document.querySelector("#heroParallax")) {
+        gsap.to("#heroParallax", {
+          yPercent: 40,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".project-hero",
+            start: "top top",
+            end: "bottom top",
+            scrub: true
+          }
+        });
+      }
+
+      // 5. Global Image Fade-In
+      gsap.fromTo(".gallery-img",
+        { opacity: 0 },
+        {
+          opacity: 1, duration: 1, stagger: 0.2,
+          scrollTrigger: {
+            trigger: ".gallery-img",
+            start: "top 95%",
+            toggleActions: "play none none none"
+          }
+        }
+      );
+
+      // Global Background Parallax
+    gsap.to("#globalBg", {
+        yPercent: -30, // Moves the background up slightly as you scroll down
+        ease: "none",
+        scrollTrigger: {
+            trigger: "body",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: true
+        }
+    });
+    });
+  </script>
+
 </body>
+
 </html>
