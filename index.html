@@ -376,6 +376,26 @@
       animation: fadeInUp 1s ease-out 0.6s both;
     }
 
+    .intelligent-title {
+      /* Responsive font size: min 1.5rem, scales with viewport, max 3rem */
+      font-size: clamp(1.5rem, 5vw, 3rem);
+
+      /* Make text wrap nicely on small screens */
+      word-wrap: break-word;
+      line-height: 1.2;
+      /* tighter spacing for long titles */
+
+      /* Centered text always */
+      text-align: center;
+
+      /* Optional: spacing around */
+      margin: 1rem auto;
+      padding: 0 1rem;
+
+      /* Ensure it doesn’t overflow */
+      overflow-wrap: break-word;
+    }
+
     @keyframes fadeInDown {
       from {
         opacity: 0;
@@ -409,6 +429,9 @@
         background-repeat: no-repeat;
       }
     }
+
+
+
 
     /* Section-specific images and overlays for readability */
     /* Keep #hero existing gradient but enable parallax class for reuse */
@@ -628,108 +651,133 @@
     <div class="container position-relative">
       <span class="fw-bold text-uppercase d-block mb-3"
         style="letter-spacing: 6px; font-size: 1rem; opacity: 0.8;">MeetTheExperts Engineering</span>
-      <h1 class="fw-bold display-3 mx-auto text-uppercase">Intelligence Architects & Systems Integrators</h1>
+      <h1 class="intelligent-title fw-bold text-uppercase text-center mx-auto">
+        Intelligence Architects & Systems Integrators
+      </h1>
       <p class="lead mx-auto mb-4">
         Engineering the intersection of physical infrastructure and digital intelligence.
       </p>
       <style>
-  :root {
-    --cycle-duration: 24s;   /* total animation time */
-    --slide-count: 4;        /* number of slides */
-  }
+        :root {
+          --cycle-duration: 24s;
+          /* total animation time */
+          --slide-count: 4;
+          /* number of slides */
+        }
 
-  /* Container */
-  .stat-cycle {
-    display: grid;
-    place-items: center;
-    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
-    font-weight: 600;
-    line-height: 1.4;
-    color: #ffffff;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 1.25rem;
-    border-radius: 10px;
-    margin: 1rem 0;
-    min-height: 100px;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
+        /* Container */
+        .stat-cycle {
+          display: grid;
+          place-items: center;
+          font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+          font-weight: 600;
+          line-height: 1.4;
+          color: #ffffff;
+          background-color: rgba(0, 0, 0, 0.6);
+          padding: 1.25rem;
+          border-radius: 10px;
+          margin: 1rem 0;
+          min-height: 100px;
+          position: relative;
+          overflow: hidden;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
 
-  /* Pause animation on hover */
-  .stat-cycle:hover > span {
-    animation-play-state: paused;
-  }
+        /* Pause animation on hover */
+        .stat-cycle:hover>span {
+          animation-play-state: paused;
+        }
 
-  .stat-cycle:hover {
-    transform: scale(1.04);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
-  }
+        .stat-cycle:hover {
+          transform: scale(1.04);
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+        }
 
-  /* Slides */
-  /* Update your Span CSS */
-.stat-cycle > span {
-  grid-area: 1 / 1;
-  width: 100%;
-  text-align: center;
-  opacity: 0;
-  visibility: hidden;
-  /* Reduced to a simpler 'linear' or 'ease' for more predictable crossfades */
-  animation: crossFade var(--cycle-duration) infinite linear; 
-  pointer-events: none;
-  will-change: opacity;
-}
+        /* Slides */
+        /* Update your Span CSS */
+        .stat-cycle>span {
+          grid-area: 1 / 1;
+          width: 100%;
+          text-align: center;
+          opacity: 0;
+          visibility: hidden;
+          /* Reduced to a simpler 'linear' or 'ease' for more predictable crossfades */
+          animation: crossFade var(--cycle-duration) infinite linear;
+          pointer-events: none;
+          will-change: opacity;
+        }
 
-  /* Highlight text */
-  .stat-cycle .highlight {
-    color: #4da6ff;
-    font-weight: 700;
-  }
+        /* Highlight text */
+        .stat-cycle .highlight {
+          color: #4da6ff;
+          font-weight: 700;
+        }
 
-  /* Automatic staggering */
-  .stat-cycle > span:nth-child(1) {
-    animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 0);
-  }
+        /* Automatic staggering */
+        .stat-cycle>span:nth-child(1) {
+          animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 0);
+        }
 
-  .stat-cycle > span:nth-child(2) {
-    animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 1);
-  }
+        .stat-cycle>span:nth-child(2) {
+          animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 1);
+        }
 
-  .stat-cycle > span:nth-child(3) {
-    animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 2);
-  }
+        .stat-cycle>span:nth-child(3) {
+          animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 2);
+        }
 
-  .stat-cycle > span:nth-child(4) {
-    animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 3);
-  }
+        .stat-cycle>span:nth-child(4) {
+          animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 3);
+        }
 
-  /* ✅ VALID keyframes (NO vars in selectors) */
-  /* Updated Keyframes for 4 Slides */
-@keyframes crossFade {
-  /* 0% to 2%: Very Snap In */
-  0% { opacity: 0; visibility: hidden; transform: translateY(10px); }
-  2% { opacity: 1; visibility: visible; transform: translateY(0); }
+        /* ✅ VALID keyframes (NO vars in selectors) */
+        /* Updated Keyframes for 4 Slides */
+        @keyframes crossFade {
 
-  /* 2% to 23%: Long Hold (Reading) */
-  23% { opacity: 1; visibility: visible; transform: translateY(0); }
+          /* 0% to 2%: Very Snap In */
+          0% {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+          }
 
-  /* 23% to 25%: Very Snap Out (Next one starts at 25%) */
-  25% { opacity: 0; visibility: hidden; transform: translateY(-10px); }
+          2% {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+          }
 
-  /* 25% to 100%: Total silence while other 3 slides play */
-  100% { opacity: 0; visibility: hidden; }
-}
+          /* 2% to 23%: Long Hold (Reading) */
+          23% {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+          }
+
+          /* 23% to 25%: Very Snap Out (Next one starts at 25%) */
+          25% {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+          }
+
+          /* 25% to 100%: Total silence while other 3 slides play */
+          100% {
+            opacity: 0;
+            visibility: hidden;
+          }
+        }
 
 
-  /* Accessibility: respect reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    .stat-cycle > span {
-      animation: none;
-      opacity: 1;
-      visibility: visible;
-    }
-  }
-</style>
+        /* Accessibility: respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          .stat-cycle>span {
+            animation: none;
+            opacity: 1;
+            visibility: visible;
+          }
+        }
+      </style>
 
       <div class="stat-cycle">
         <span>
