@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>MTE – Systems Integrators & Intelligence Architects</title>
@@ -10,24 +11,31 @@
 
   <style>
     /* Technical Blueprint Background */
-    body { 
-      background-color: #f8f9fa; 
-      background-image: 
+    body {
+      background-color: #f8f9fa;
+      background-image:
         linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
       background-size: 30px 30px;
-      overflow-x: hidden; /* This prevents horizontal scrolling/extra columns */
-    width: 100%;
+      overflow-x: hidden;
+      /* This prevents horizontal scrolling/extra columns */
+      width: 100%;
     }
 
     /* ===== Animated Scroll Rows ===== */
     .scroll-row {
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
       position: relative;
       padding: 1.5rem 0;
+      cursor: grab;
+      touch-action: pan-y;
+      scroll-behavior: smooth;
     }
 
-    .scroll-row::before, .scroll-row::after {
+    .scroll-row::before,
+    .scroll-row::after {
       content: "";
       position: absolute;
       top: 0;
@@ -36,57 +44,102 @@
       z-index: 2;
       pointer-events: none;
     }
-    .scroll-row::before { left: 0; background: linear-gradient(to right, #f8f9fa, transparent); }
-    .scroll-row::after { right: 0; background: linear-gradient(to left, #f8f9fa, transparent); }
+
+    .scroll-row::before {
+      left: 0;
+      background: linear-gradient(to right, #f8f9fa, transparent);
+    }
+
+    .scroll-row::after {
+      right: 0;
+      background: linear-gradient(to left, #f8f9fa, transparent);
+    }
 
     .scroll-track {
       display: flex;
       gap: 1.5rem;
       width: max-content;
+      will-change: transform;
+      /* This element is moved via transform for smooth continuous animation. */
+    }
+
+    .scroll-track.auto-scroll {
       animation: scroll-left 45s linear infinite;
     }
 
-    .scroll-track.reverse { animation: scroll-right 50s linear infinite; }
-    
-    .scroll-row:hover .scroll-track,
-    .stop-scroll { 
-      animation-play-state: paused !important; 
+    .scroll-track.reverse.auto-scroll {
+      animation: scroll-right 50s linear infinite;
     }
 
-    @keyframes scroll-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-    @keyframes scroll-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+    .scroll-row:hover .scroll-track,
+    .stop-scroll {
+      animation-play-state: paused !important;
+    }
+
+    @keyframes scroll-left {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    @keyframes scroll-right {
+      from {
+        transform: translateX(-50%);
+      }
+
+      to {
+        transform: translateX(0);
+      }
+    }
 
     /* Tech-style card polish */
     .card {
-  min-width: 320px;
-  border: 1px solid rgba(0,0,0,0.05);
-  border-left: 4px solid #212529 !important;
-  background: rgba(255, 255, 255, 0.85); /* Slightly more transparent */
-  backdrop-filter: blur(12px); /* Increased blur for better legibility */
-  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Smoother hover */
-}
-    .card {
-      
-      
-      opacity: 0;
-      transform: translateY(40px) scale(0.98);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+      flex: 0 0 300px;
+      min-width: 240px;
+      max-width: 320px;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-left: 4px solid #212529 !important;
+      background: rgba(255, 255, 255, 0.85);
+      /* Slightly more transparent */
+      backdrop-filter: blur(12px);
+      /* Increased blur for better legibility */
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      /* Smoother hover */
     }
 
-    .card.in-view { opacity: 1; 
-    transform: translateY(0) scale(1);}
-    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+    .card {
+
+
+      opacity: 0;
+      transform: translateY(40px) scale(0.98);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .card.in-view {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
 
     /* Architecture Pillar Styling */
     .pillar-card {
       transition: all 0.3s ease;
       border-left-width: 5px !important;
     }
+
     .pillar-card:hover {
       background-color: #ffffff !important;
       transform: scale(1.02);
-      box-shadow: 0 10px 15px rgba(0,0,0,0.05) !important;
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05) !important;
     }
 
     .status-pulse {
@@ -98,517 +151,988 @@
       margin-right: 6px;
       animation: pulse 2s infinite;
     }
+
     .sticky-ribbon {
-  position: -webkit-sticky; /* For Safari */
-  position: sticky;
-  top: 0;
-  z-index: 1020; /* Higher than cards, lower than modals */
-  background: #212529; /* Solid color to prevent transparency while scrolling */
-}
-/* Ensure sections have enough height to see the background move */
-#ideas {
-  background-color: transparent !important; /* Let the bridge image show through */
-}
+      position: -webkit-sticky;
+      /* For Safari */
+      position: sticky;
+      top: 0;
+      z-index: 1020;
+      /* Higher than cards, lower than modals */
+      background: #212529;
+      /* Solid color to prevent transparency while scrolling */
+    }
 
-#built-systems {
-  background-color: rgba(255, 255, 255, 0.6) !important; /* Semi-transparent white */
-}
+    /* Ensure sections have enough height to see the background move */
+    #ideas {
+      background-color: transparent !important;
+      /* Let the bridge image show through */
+    }
 
-#built-systems, #ideas {
-  min-height: 700px; /* Increased slightly for better parallax travel distance */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  position: relative; /* Crucial so stationary images stay contained */
-  padding: 80px 0;    /* Adds extra space for the "Bridge" images to overlap */
-}
+    #built-systems {
+      background-color: rgba(255, 255, 255, 0.6) !important;
+      /* Semi-transparent white */
+    }
 
-/* REPLACE OLD .ghost-artifact WITH THIS */
-/* Core styling for the floating background images */
-.ghost-artifact {
-  position: absolute;
-  opacity: 0.06;
-  pointer-events: none;
-  z-index: 0;
-  filter: grayscale(100%);
-  will-change: transform; /* Helps the browser keep the movement smooth */
-}
+    #built-systems,
+    #ideas {
+      min-height: 520px;
+      /* Reduced height for tighter sections while keeping parallax travel */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      /* Crucial so stationary images stay contained */
+      padding: 60px 0;
+      /* Reduced vertical padding to tighten layout */
+    }
 
+    @media (max-width: 992px) {
 
-
-
-#contact-cta {
-  background: radial-gradient(circle at 50% 50%, #2c3034 0%, #212529 100%);
-}
-#contact-cta .ghost-artifact {
-  z-index: 0;
-}
-#contact-cta .container {
-  z-index: 2;
-  position: relative;
-}
-
-
-.btn-primary {
-  background-color: #007bff;
-  border: none;
-  transition: all 0.3s ease;
-  letter-spacing: 1px;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3) !important;
-}
+      #built-systems,
+      #ideas {
+        min-height: auto;
+        padding: 40px 0;
+      }
+    }
 
 
 
-/* Optional: Make the button glow slightly */
-@keyframes glow {
-  0% { box-shadow: 0 0 5px rgba(0, 123, 255, 0.2); }
-  50% { box-shadow: 0 0 20px rgba(0, 123, 255, 0.5); }
-  100% { box-shadow: 0 0 5px rgba(0, 123, 255, 0.2); }
-}
 
-.btn-primary {
-  animation: glow 3s infinite;
-}
+
+
+
+
+
+
+    .btn-primary {
+      background-color: #007bff;
+      border: none;
+      transition: all 0.3s ease;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3) !important;
+    }
+
+
+
+    /* Optional: Make the button glow slightly */
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 20px rgba(0, 123, 255, 0.5);
+      }
+
+      100% {
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+      }
+    }
+
+    .btn-primary {
+      animation: glow 3s infinite;
+    }
 
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-      70% { box-shadow: 0 0 0 8px rgba(40, 167, 69, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+      0% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 8px rgba(40, 167, 69, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+      }
     }
 
-    .tag { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
     /* Prevent the horizontal "second column" scroll */
-html, body {
-  overflow-x: hidden;
-  width: 100%;
-  position: relative;
-}
+    html,
+    body {
+      overflow-x: hidden;
+      width: 100%;
+      position: relative;
+    }
 
-.social-nav {
-  position: fixed; 
-  top: 50%; 
-  right: 10px; /* Reduced slightly to stay inside mobile safe zones */
-  transform: translateY(-50%);
-  display: flex; 
-  flex-direction: column; 
-  gap: 10px; 
-  z-index: 10000; /* Higher than your grain overlay */
-}
+    .social-nav {
+      position: fixed;
+      top: 50%;
+      right: 10px;
+      /* Reduced slightly to stay inside mobile safe zones */
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10000;
+      /* Higher than your grain overlay */
+    }
 
-.social-nav a {
-  width: 40px; 
-  height: 40px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center;
-  background: #212529; 
-  color: #fff; 
-  border-radius: 50%; 
-  text-decoration: none; 
-  transition: 0.3s;
-}
+    .social-nav a {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #212529;
+      color: #fff;
+      border-radius: 50%;
+      text-decoration: none;
+      transition: 0.3s;
+    }
 
-.social-nav a:hover { 
-  background: #007bff; 
-  transform: translateX(-5px); 
-}
+    .social-nav a:hover {
+      background: #007bff;
+      transform: translateX(-5px);
+    }
 
-/* Ensure cards don't push the screen wider than mobile phones */
-@media (max-width: 400px) {
-  .card {
-    min-width: 280px !important; /* Forces cards to shrink for tiny phones */
-  }
-}
+    /* Ensure cards don't push the screen wider than mobile phones */
+    @media (max-width: 400px) {
+      .card {
+        flex: 0 0 220px !important;
+        min-width: 200px !important;
+      }
+    }
+
+    .scroll-row.dragging {
+      cursor: grabbing;
+    }
+
+    /* Dot navigation hover/active styling */
+    #section-nav a:hover span {
+      background-color: #007bff !important;
+      transform: scale(1.2);
+      transition: all 0.3s;
+    }
+
+    #section-nav a.active span {
+      background-color: #28a745 !important;
+      width: 16px !important;
+      height: 16px !important;
+    }
+
+    /* New styles for improved hero section */
+    #hero {
+      background: linear-gradient(to bottom, rgba(33, 37, 41, 0.8), rgba(33, 37, 41, 0.4)), url('images/technology-background-with-chip.jpg');
+      background-size: cover;
+      background-position: center;
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    #hero::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 20px 20px;
+      opacity: 0.5;
+    }
+
+
+
+
+
+    #hero h1 {
+      font-size: 4rem;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      animation: fadeInDown 1s ease-out;
+    }
+
+    #hero p {
+      font-size: 1.25rem;
+      max-width: 800px;
+      margin: 0 auto 2rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      animation: fadeInUp 1s ease-out 0.3s both;
+    }
+
+    #hero .btn {
+      animation: fadeInUp 1s ease-out 0.6s both;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Reusable Parallax Functionality */
+    @media (min-width: 769px) {
+      .parallax {
+        background-attachment: fixed;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+    }
+
+    /* Section-specific images and overlays for readability */
+    /* Keep #hero existing gradient but enable parallax class for reuse */
+    #hero.parallax {
+      background-attachment: fixed;
+      /* fallback if class used */
+    }
+
+    #built-systems.parallax {
+      --bg-image: url('https://img.freepik.com/free-vector/futuristic-wireframe-landscape-grid_1048-12602.jpg?semt=ais_hybrid&w=740&q=80');
+      background-image: var(--bg-image);
+      background-blend-mode: normal;
+    }
+
+    #built-systems.parallax::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.6);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #built-systems.parallax .container-fluid {
+      position: relative;
+      z-index: 1;
+    }
+
+    #ideas.parallax {
+      --bg-image: url('https://static.vecteezy.com/system/resources/previews/056/521/442/non_2x/an-abstract-ai-circuit-board-in-elegant-blue-light-lines-on-dark-background-with-lighting-effect-and-the-technology-ai-abstract-with-polygons-shapes-illustration-vector.jpg');
+      background-image: var(--bg-image);
+      background-blend-mode: normal;
+    }
+
+    #ideas.parallax::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(248, 249, 250, 0.5);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #ideas.parallax .container-fluid {
+      position: relative;
+      z-index: 1;
+    }
+
+
+    /* Background images + overlays for container-based sections */
+    #collaboration.parallax {
+      --bg-image: url('https://images.unsplash.com/photo-1518779578993-ec3579fee39f?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&s=0b4d1a8b9f4a3e6f4a8d4f2d6e3a1c9d');
+      background-image: linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), var(--bg-image);
+      background-size: cover;
+      background-position: center;
+    }
+
+    #collaboration.parallax::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(248, 249, 250, 0.85);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #collaboration.parallax>* {
+      position: relative;
+      z-index: 1;
+    }
+
+    #technologies_and_training.parallax {
+      --bg-image: url('https://images.unsplash.com/photo-1562408590-e32931084e23?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3');
+      background-image: linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04)), var(--bg-image);
+      background-size: cover;
+      background-position: center;
+    }
+
+    #technologies_and_training.parallax::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.75);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #technologies_and_training.parallax>* {
+      position: relative;
+      z-index: 1;
+    }
+
+
+
+    #contact-cta {
+      /* Combine image (bottom layer) with gradient (top layer) for blending */
+      background-image: url('https://images.unsplash.com/photo-1727434032773-af3cd98375ba?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'),
+        radial-gradient(circle at 50% 50%, #2c3034 0%, #212529 100%);
+      background-blend-mode: overlay;
+      /* Blends image with gradient for subtle effect */
+      background-size: cover, cover;
+      /* Cover for both layers */
+      background-position: center, center;
+      min-height: 80vh;
+      /* Ensure enough height to observe parallax during scroll */
+    }
+
+    /* Optional: Add a subtle overlay if text contrast is low (dark image + light text is already good, but adjust opacity) */
+    #contact-cta::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      /* Darken slightly for better text pop */
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Ensure content sits above any overlay */
+    #contact-cta .container {
+      position: relative;
+      z-index: 1;
+    }
+
+
+    /* Optional: Subtle filter for all parallax images to reduce contrast if needed */
+    .parallax {
+      filter: saturate(0.98) contrast(0.98);
+    }
   </style>
 </head>
 
-<body>
-<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.03; background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grain_Noise.jpg');"></div>
-<div class="social-nav">
-  <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-  <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
-  <a href="mailto:info@mte.com" title="Email"><i class="fa-solid fa-envelope"></i></a>
-</div>
-<div class="sticky-ribbon text-light py-2 border-bottom border-secondary shadow">
-  <div class="container-fluid d-flex justify-content-around align-items-center small font-monospace text-center flex-wrap">
-    
-    <span class="px-2 d-none d-xl-inline">
-      <i class="fa-solid fa-microchip me-2 text-info"></i>
-      MTE_OS: v2.4
-    </span>
-
-    <span class="px-2">
-      <i class="fa-solid fa-diagram-project me-2 text-success"></i>
-      SYSTEMS: 08
-    </span>
-
-    <span class="px-2">
-      <i class="fa-solid fa-wave-square me-2 text-warning"></i>
-      UPTIME: 99.98%
-    </span>
-
-    <span class="px-2 d-none d-md-inline">
-      <i class="fa-solid fa-database me-2 text-primary"></i>
-      PIPELINES: ACTIVE
-    </span>
-
-    <span class="px-2 font-monospace text-success border-start border-secondary ps-3 ms-2 d-none d-sm-inline" id="live-clock">
-      03:03:00 AM
-    </span>
+<body data-bs-spy="scroll" data-bs-target="#section-nav" data-bs-smooth-scroll="true" tabindex="0">
+  <div
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; opacity: 0.03; background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grain_Noise.jpg');">
   </div>
-</div>
-
-<section class="pt-5 pb-4 position-relative overflow-hidden" style="min-height: 50vh; display: flex; align-items: center;">
-  
-  <img src="images/image.jpg" 
-       class="ghost-artifact parallax-img" 
-       data-speed="0.6" 
-       style="right: 5%; top: 20px; height: 140%; opacity: 0.05; transform: rotate(-15deg); z-index: 0;">
-
-  <div class="container text-center position-relative" style="z-index: 1;">
-    <div class="mb-2">
-      <span class="fw-bold text-uppercase" style="letter-spacing: 5px; font-size: 0.85rem; color: #212529;">MeetTheExperts Architecture</span>
-    </div>
-    <h1 class="fw-bold display-5">Intelligence Architects & Systems Integrators</h1>
-    <p class="lead text-muted mx-auto" style="max-width: 750px;">
-      Engineering the intersection of physical infrastructure and digital intelligence.
-    </p>
+  <div class="social-nav">
+    <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+    <a href="#" title="GitHub"><i class="fa-brands fa-github"></i></a>
+    <a href="mailto:info@mte.com" title="Email"><i class="fa-solid fa-envelope"></i></a>
   </div>
-</section>
+  <div id="section-nav" class="position-fixed"
+    style="top:50%; left:10px; transform:translateY(-50%); display:flex; flex-direction:column; gap:10px; z-index:10000;">
+    <a href="#hero" class="nav-link p-0" title="Home">
+      <span class="d-block rounded-circle bg-secondary" style="width:12px;height:12px;"></span>
+    </a>
 
+    <a href="#collaboration" class="nav-link p-0" title="Collaboration">
+      <span class="d-block rounded-circle bg-secondary" style="width:12px;height:12px;"></span>
+    </a>
 
-<div class="container mb-5">
-  <div class="row g-4 text-center">
-    <div class="col-md-4">
-      <div class="p-4 border-start border-primary bg-white shadow-sm h-100 pillar-card">
-        <i class="fa-solid fa-diagram-project mb-3 text-primary fs-3"></i>
-        <h6 class="fw-bold text-uppercase small mb-3">Systems Integration</h6>
-        <p class="small text-muted mb-0">
-          Designing and integrating hardware, software, and data systems into reliable end-to-end solutions.
-        </p>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="p-4 border-start border-success bg-white shadow-sm h-100 pillar-card">
-        <i class="fa-solid fa-microchip mb-3 text-success fs-3"></i>
-        <h6 class="fw-bold text-uppercase small mb-3">Edge Intelligence</h6>
-        <p class="small text-muted mb-0">
-          On-device sensing, decision-making, and automation that works even with limited connectivity.
-        </p>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="p-4 border-start border-info bg-white shadow-sm h-100 pillar-card">
-        <i class="fa-solid fa-map-location-dot mb-3 text-info fs-3"></i>
-        <h6 class="fw-bold text-uppercase small mb-3">Geospatial Insights</h6>
-        <p class="small text-muted mb-0">
-          Collecting, visualizing, and analyzing field data to turn raw measurements into actionable insight.
-        </p>
-      </div>
+    <a href="#technologies_and_training" class="nav-link p-0" title="Technologies">
+      <span class="d-block rounded-circle bg-secondary" style="width:12px;height:12px;"></span>
+    </a>
+    <a href="#built-systems" class="nav-link p-0" title="Deployed Systems">
+      <span class="d-block rounded-circle bg-secondary" style="width:12px;height:12px;"></span>
+    </a>
+    <a href="#ideas" class="nav-link p-0" title="R&D Projects">
+      <span class="d-block rounded-circle bg-secondary" style="width:12px;height:12px;"></span>
+    </a>
+    <a href="#contact-cta" class="nav-link p-0" title="Contact">
+      <span class="d-block rounded-circle bg-secondary" style="width:12px;height:12px;"></span>
+    </a>
+  </div>
+  <div class="sticky-ribbon text-light py-2 border-bottom border-secondary shadow">
+    <div
+      class="container-fluid d-flex justify-content-around align-items-center small font-monospace text-center flex-wrap">
+
+      <span class="px-2 d-none d-xl-inline">
+        <i class="fa-solid fa-microchip me-2 text-info"></i>
+        MTE_OS: v2.4
+      </span>
+
+      <span class="px-2">
+        <i class="fa-solid fa-diagram-project me-2 text-success"></i>
+        SYSTEMS: 08
+      </span>
+
+      <span class="px-2">
+        <i class="fa-solid fa-wave-square me-2 text-warning"></i>
+        UPTIME: 99.98%
+      </span>
+
+      <span class="px-2 d-none d-md-inline">
+        <i class="fa-solid fa-database me-2 text-primary"></i>
+        PIPELINES: ACTIVE
+      </span>
+
+      <span class="px-2 font-monospace text-success border-start border-secondary ps-3 ms-2 d-none d-sm-inline"
+        id="live-clock">
+        03:03:00 AM
+      </span>
+      <span class="px-2 d-none d-md-inline text-uppercase small">
+        SYSTEMS: 08 &nbsp; • &nbsp; UPTIME: 99.98% &nbsp; • &nbsp; LATENCY: &lt; 24ms &nbsp; • &nbsp; ENCRYPTION:
+        AES-256 &nbsp; • &nbsp; STATUS: ENCRYPTED &nbsp; • &nbsp; LOC: DISTRIBUTED
+      </span>
     </div>
   </div>
-</div>
 
-<div class="container mb-5">
-  <div class="row justify-content-center align-items-center g-5 text-muted text-center opacity-75">
-    <div class="col-auto">
-      <i class="fa-solid fa-tower-broadcast fs-3 d-block mb-2"></i>
-      <span class="small fw-bold">LoRaWAN</span>
-    </div>
-    <div class="col-auto">
-      <i class="fa-solid fa-microchip fs-3 d-block mb-2"></i>
-      <span class="small fw-bold">ESP32/C++</span>
-    </div>
-    <div class="col-auto">
-      <i class="fa-brands fa-python fs-3 d-block mb-2"></i>
-      <span class="small fw-bold">Python</span>
-    </div>
-    <div class="col-auto">
-      <i class="fa-brands fa-aws fs-3 d-block mb-2"></i>
-      <span class="small fw-bold">Cloud Arch</span>
-    </div>
-    <div class="col-auto">
-      <i class="fa-brands fa-docker fs-3 d-block mb-2"></i>
-      <span class="small fw-bold">Docker</span>
-    </div>
-  </div>
-</div>
-<div class="position-relative w-100" style="height: 0; z-index: 0;">
-  <img src="images/image (3).jpg" 
-       class="ghost-artifact parallax-img" 
-       data-speed="0.5" 
-       style="left: 10%; top: -150px; height: 400px; opacity: 0.08; transform: rotate(-5deg);">
-</div> 
 
-<section id="built-systems" class="py-5 bg-white bg-opacity-50 border-top border-bottom position-relative overflow-hidden">
-  
-  <img src="images/technology-background-with-chip.jpg" 
-       style="position: absolute; right: -50px; bottom: -20px; opacity: 0.04; height: 110%; z-index: 0; filter: grayscale(100%); pointer-events: none; transform: rotate(3deg);">
+  <section id="hero" class="text-center py-5 overflow-hidden position-relative parallax">
+    <div class="container position-relative">
+      <span class="fw-bold text-uppercase d-block mb-3"
+        style="letter-spacing: 6px; font-size: 1rem; opacity: 0.8;">MeetTheExperts Engineering</span>
+      <h1 class="fw-bold display-3 text-uppercase">Intelligence Architects & Systems Integrators</h1>
+      <p class="lead mx-auto mb-4">
+        Engineering the intersection of physical infrastructure and digital intelligence.
+      </p>
+      <style>
+  :root {
+    --cycle-duration: 24s;   /* total animation time */
+    --slide-count: 4;        /* number of slides */
+  }
 
-  
+  /* Container */
+  .stat-cycle {
+    display: grid;
+    place-items: center;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.4;
+    color: #ffffff;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 1.25rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    min-height: 100px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
 
-  <div class="container-fluid position-relative" style="z-index: 1;">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3 px-4 gap-3">
-      
-      <div>
-        <h3 class="fw-bold m-0 text-uppercase small" style="letter-spacing: 2px;">Built Systems</h3>
-        <p class="text-muted small m-0 font-monospace" style="font-size: 0.65rem;">VERIFIED_DEPLOYMENTS_LOG</p>
+  /* Pause animation on hover */
+  .stat-cycle:hover > span {
+    animation-play-state: paused;
+  }
+
+  .stat-cycle:hover {
+    transform: scale(1.04);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Slides */
+  /* Update your Span CSS */
+.stat-cycle > span {
+  grid-area: 1 / 1;
+  width: 100%;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  /* Reduced to a simpler 'linear' or 'ease' for more predictable crossfades */
+  animation: crossFade var(--cycle-duration) infinite linear; 
+  pointer-events: none;
+  will-change: opacity;
+}
+
+  /* Highlight text */
+  .stat-cycle .highlight {
+    color: #4da6ff;
+    font-weight: 700;
+  }
+
+  /* Automatic staggering */
+  .stat-cycle > span:nth-child(1) {
+    animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 0);
+  }
+
+  .stat-cycle > span:nth-child(2) {
+    animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 1);
+  }
+
+  .stat-cycle > span:nth-child(3) {
+    animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 2);
+  }
+
+  .stat-cycle > span:nth-child(4) {
+    animation-delay: calc(var(--cycle-duration) / var(--slide-count) * 3);
+  }
+
+  /* ✅ VALID keyframes (NO vars in selectors) */
+  /* Updated Keyframes for 4 Slides */
+@keyframes crossFade {
+  /* 0% to 2%: Very Snap In */
+  0% { opacity: 0; visibility: hidden; transform: translateY(10px); }
+  2% { opacity: 1; visibility: visible; transform: translateY(0); }
+
+  /* 2% to 23%: Long Hold (Reading) */
+  23% { opacity: 1; visibility: visible; transform: translateY(0); }
+
+  /* 23% to 25%: Very Snap Out (Next one starts at 25%) */
+  25% { opacity: 0; visibility: hidden; transform: translateY(-10px); }
+
+  /* 25% to 100%: Total silence while other 3 slides play */
+  100% { opacity: 0; visibility: hidden; }
+}
+
+
+  /* Accessibility: respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .stat-cycle > span {
+      animation: none;
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+</style>
+
+      <div class="stat-cycle">
+        <span>
+          Global CPS market projected to reach
+          <span class="highlight">$255.3 billion by 2029</span>
+          (15.5% CAGR) — driven by smart infrastructure.
+        </span>
+
+        <span>
+          US CPS market expected to hit
+          <span class="highlight">$79.9 billion by 2032</span>
+          (10.27% CAGR) — fueled by IoT and edge intelligence.
+        </span>
+
+        <span>
+          Cyberattacks on critical infrastructure surged
+          <span class="highlight">420%</span>
+          (2011–2013) — secure systems integration is essential.
+        </span>
+
+        <span>
+          CPS adoption in US manufacturing reached
+          <span class="highlight">35% in 2023</span>
+          — enabling real-time data-driven decisions.
+        </span>
       </div>
 
-      <div class="filter-bar d-flex flex-wrap gap-2" data-target="built">
-        <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
-        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Embedded">Embedded</button>
-        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="IoT">IoT</button>
-        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Energy">Energy</button>
-        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Sensors">Sensors</button>
-      </div>
-    </div>
 
-    <div class="scroll-row">
-      <div class="scroll-track" id="built-track"></div>
+      <a href="#contact-cta" class="btn btn-primary btn-lg px-5 fw-bold shadow-lg">
+        Initialize Project <i class="fa-solid fa-arrow-right ms-2"></i>
+      </a>
     </div>
-  </div>
-</section>
+  </section>
+  <section id="collaboration" class="text-center py-5 overflow-hidden position-relative parallax">
 
-<div class="position-relative w-100" style="height: 0; z-index: 0;">
-  <img src="images/image (1).jpg" 
-       class="ghost-artifact parallax-img" 
-       data-speed="-0.4" 
-       style="right: 15%; top: -100px; height: 350px; opacity: 0.07; transform: rotate(10deg);">
-</div>
-
-<section id="ideas" class="py-5 position-relative overflow-hidden">
-  
- <img src="images/image (2).jpg" 
-       style="position: absolute; left: -100px; top: 0; opacity: 0.05; height: 120%; z-index: 0; transform: rotate(-5deg); pointer-events: none; filter: grayscale(100%);">
-  <div class="container-fluid position-relative" style="z-index: 1;">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3 px-4 gap-3">
-      <h3 class="fw-bold m-0 text-uppercase small" style="letter-spacing: 2px;">R&D / Experimental</h3>
-      <div class="filter-bar d-flex flex-wrap gap-2" data-target="ideas">
-        <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
-        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="R&D">R&D</button>
-        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="AgriTech">AgriTech</button>
-        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="GIS">GIS</button>
-        <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Network">Network</button>
-      </div>
-    </div>
-    <div class="scroll-row">
-      <div class="scroll-track reverse" id="ideas-track"></div>
-    </div>
-  </div>
-</section>
-
-<div class="modal fade" id="specsModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg">
-      <div class="modal-header bg-dark text-white border-0">
-        <h5 class="modal-title fw-bold" id="modalTitle">System Specifications</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body p-4" id="modalContent"></div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-outline-dark w-100 fw-bold" data-bs-dismiss="modal">CLOSE ARCHIVE</button>
-      </div>
-    </div>
-  </div>
-</div>
-<section id="contact-cta" class="py-5 bg-dark text-light position-relative overflow-hidden">
-  
-<img src="images/image (4).jpg"
-     class="ghost-artifact parallax-img"
-     data-speed="0.15"
-     style="
-       left: -10%;
-       top: -40px;
-       height: 140%;
-       opacity: 0.08;
-       --rotation: -3deg;
-     ">
-
-  <div class="container position-relative" style="z-index: 1;">
-    <div class="row justify-content-center">
-      <div class="col-lg-8 text-center">
-        <div class="mb-4">
-          <span class="badge border border-success text-success px-3 py-2 mb-3 font-monospace">
-            <span class="status-pulse"></span> SYSTEM_READY: ACCEPTING_NEW_QUERIES
-          </span>
-          <h2 class="display-5 fw-bold mb-3">Ready to Integrate?</h2>
-          <p class="lead opacity-75 mb-5">
-            Whether you need an edge-computing deployment or a custom GIS architecture, our systems are ready to scale with your vision.
-          </p>
+    <div class="container mb-5 section-content" id="core-expertise">
+      <div class="row g-4 text-center">
+        <div class="col-md-4">
+          <div class="p-4 border-start border-primary bg-white shadow-sm h-100 pillar-card">
+            <i class="fa-solid fa-diagram-project mb-3 text-primary fs-3"></i>
+            <h6 class="fw-bold text-uppercase small mb-3">Systems Integration</h6>
+            <p class="small text-muted mb-0">
+              End-to-end design and integration of hardware, embedded devices, software platforms, data pipelines, and
+              domain-expert inputs into coherent, operational cyber‑physical systems.
+            </p>
+          </div>
         </div>
-
-        <div class="d-grid d-sm-flex justify-content-sm-center gap-3">
-          <a href="mailto:info@mte.com" class="btn btn-primary btn-lg px-5 fw-bold shadow-sm">
-            INITIALIZE PROJECT <i class="fa-solid fa-terminal ms-2"></i>
-          </a>
-          <a href="#" class="btn btn-outline-light btn-lg px-5 fw-bold">
-            VIEW CAPABILITIES
-          </a>
+        <div class="col-md-4">
+          <div class="p-4 border-start border-success bg-white shadow-sm h-100 pillar-card">
+            <i class="fa-solid fa-microchip mb-3 text-success fs-3"></i>
+            <h6 class="fw-bold text-uppercase small mb-3">Embedded Systems & Edge Intelligence</h6>
+            <p class="small text-muted mb-0">
+              Design and development of microcontroller-based embedded systems—sensors, firmware, communications, and
+              power-aware devices—augmented with on-device intelligence for local processing, automation, and
+              decision-making in low-connectivity environments.
+            </p>
+          </div>
         </div>
-        
-        <div class="mt-5 pt-4 border-top border-secondary opacity-50">
-          <div class="row g-3 small font-monospace">
-            <div class="col-6 col-md-3">LATENCY: < 24ms</div>
-            <div class="col-6 col-md-3">ENCRYPTION: AES-256</div>
-            <div class="col-6 col-md-3">STATUS: ENCRYPTED</div>
-            <div class="col-6 col-md-3">LOC: 0.0.0.0</div>
+        <div class="col-md-4">
+          <div class="p-4 border-start border-info bg-white shadow-sm h-100 pillar-card">
+            <i class="fa-solid fa-map-location-dot mb-3 text-info fs-3"></i>
+            <h6 class="fw-bold text-uppercase small mb-3">Geospatial Intelligence & Spatial Analysis</h6>
+            <p class="small text-muted mb-0">
+              Acquisition, analysis, and interpretation of geospatial data to support infrastructure planning,
+              environmental monitoring, situational awareness, and data-driven decision-making across physical systems.
+            </p>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="container mb-5 section-content  ">
+      <h3 class="fw-bold text-center text-uppercase small mb-4" style="letter-spacing: 2px;">Collaboration &
+        Professional
+        Integration</h3>
+      <p class="text-muted mx-auto" style="max-width: 900px;">
+        We work alongside industry professionals—including licensed surveyors, software engineers, and domain
+        specialists—to integrate validated data, professional workflows, and proven tools into intelligent systems.
+        Our role is not to replace domain experts, but to architect, integrate, and operationalize their expertise
+        into
+        functional cyber-physical solutions.
+      </p>
+    </div>
+  </section>
+
+  <section id="technologies_and_training" class="text-center position-relative parallax py-5 overflow-hidden">
+
+    <div class="container mb-5 section-content  ">
+      <h3 class="fw-bold text-center text-uppercase small mb-4" style="letter-spacing: 2px;">Training & Systems Capacity
+        Building</h3>
+      <p class="text-muted mx-auto mb-4" style="max-width: 900px;">
+        We build human capacity to design, deploy, operate, and scale intelligent systems. Training is structured as a
+        progression from foundational digital literacy to applied systems development.
+      </p>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="p-4 bg-white shadow-sm h-100">
+            <h6 class="fw-bold text-uppercase small mb-3">Digital Foundations</h6>
+            <p class="small text-muted mb-0">
+              Computer Essentials & Online Essentials (ICDL-aligned fundamentals)
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-4 bg-white shadow-sm h-100">
+            <h6 class="fw-bold text-uppercase small mb-3">Foundational Computational Thinking</h6>
+            <p class="small text-muted mb-0">
+              Visual Programming with Scratch — used as an entry point for logic, problem-solving, and systems thinking,
+              particularly for beginners and young learners.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="p-4 bg-white shadow-sm h-100">
+            <h6 class="fw-bold text-uppercase small mb-3">Progressive Programming Pathway</h6>
+            <p class="small text-muted mb-0">
+              Transitioning from block-based concepts to intermediate and advanced Python programming, including:
+            <ul class="small text-muted mt-2">
+              <li>Data analysis and automation</li>
+              <li>IoT scripting and device interaction</li>
+              <li>Systems development and integration workflows</li>
+            </ul>
+            All training is delivered using real-world engineering contexts, not abstract exercises.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container mb-5 section-content  ">
+      <div class="row justify-content-center align-items-center g-5 text-muted text-center opacity-75">
+        <div class="col-auto">
+          <i class="fa-solid fa-tower-broadcast fs-3 d-block mb-2"></i>
+          <span class="small fw-bold">LoRaWAN</span>
+        </div>
+        <div class="col-auto">
+          <i class="fa-solid fa-microchip fs-3 d-block mb-2"></i>
+          <span class="small fw-bold">Embedded C/C++ (ESP32)</span>
+        </div>
+        <div class="col-auto">
+          <i class="fa-brands fa-python fs-3 d-block mb-2"></i>
+          <span class="small fw-bold">Python</span>
+        </div>
+        <div class="col-auto">
+          <i class="fa-brands fa-aws fs-3 d-block mb-2"></i>
+          <span class="small fw-bold">Cloud Architecture</span>
+        </div>
+        <div class="col-auto">
+          <i class="fa-brands fa-docker fs-3 d-block mb-2"></i>
+          <span class="small fw-bold">Docker</span>
+        </div>
+        <div class="col-auto">
+          <i class="fa-solid fa-map fs-3 d-block mb-2"></i>
+          <span class="small fw-bold">ArcGIS (Esri)</span>
+        </div>
+        <div class="col-auto">
+          <i class="fa-solid fa-map-marked-alt fs-3 d-block mb-2"></i>
+          <span class="small fw-bold">QGIS</span>
+        </div>
+        <div class="col-auto">
+          <i class="fa-solid fa-puzzle-piece fs-3 d-block mb-2"></i>
+          <span class="small fw-bold">Scratch</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="built-systems"
+    class="py-5 bg-white bg-opacity-50 border-top border-bottom position-relative overflow-hidden parallax">
+
+
+
+
+
+    <div class="container-fluid position-relative" style="z-index: 1;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3 px-4 gap-3">
+
+        <div>
+          <h3 class="fw-bold m-0 text-uppercase small" style="letter-spacing: 2px;">Built Systems</h3>
+          <p class="text-muted small m-0 font-monospace" style="font-size: 0.65rem;">VERIFIED_DEPLOYMENTS_LOG</p>
+        </div>
+
+        <div class="filter-bar d-flex flex-wrap gap-2" data-target="built">
+          <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
+          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Embedded">Embedded</button>
+          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="IoT">IoT</button>
+          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Energy">Energy</button>
+          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Sensors">Sensors</button>
+        </div>
+      </div>
+
+      <div class="scroll-row">
+        <div class="scroll-track" id="built-track"></div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <section id="ideas" class="py-5 position-relative overflow-hidden parallax">
+
+
+    <div class="container-fluid position-relative" style="z-index: 1;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-3 px-4 gap-3">
+        <h3 class="fw-bold m-0 text-uppercase small" style="letter-spacing: 2px;">R&D / Experimental</h3>
+        <div class="filter-bar d-flex flex-wrap gap-2" data-target="ideas">
+          <button class="filter-btn btn btn-sm btn-outline-dark active" data-tag="all">All</button>
+          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="R&D">R&D</button>
+          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="AgriTech">AgriTech</button>
+          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="GIS">GIS</button>
+          <button class="filter-btn btn btn-sm btn-outline-dark" data-tag="Network">Network</button>
+        </div>
+      </div>
+      <div class="scroll-row">
+        <div class="scroll-track reverse" id="ideas-track"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal fade" id="specsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-dark text-white border-0">
+          <h5 class="modal-title fw-bold" id="modalTitle">System Specifications</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4" id="modalContent"></div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-dark w-100 fw-bold" data-bs-dismiss="modal">CLOSE
+            ARCHIVE</button>
+        </div>
+      </div>
+    </div>
   </div>
-</section>
-
-<footer class="py-4 bg-dark text-light border-top border-secondary">
-  <div class="container text-center">
-    <p class="mb-1 fw-bold">MTE – Cyber‑Physical Systems</p>
-    <small class="opacity-50">Embedded • IoT • GIS • Custom Software Architecture</small>
-  </div>
-</footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-  setInterval(() => {
-  document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
-}, 1000);
+  <section id="contact-cta" class="py-5 bg-dark text-light position-relative overflow-hidden parallax">
 
 
 
-// ADD THIS INSIDE YOUR <script> TAG
-let scrollPos = 0;
-window.addEventListener('scroll', () => {
-  scrollPos = window.pageYOffset;
-  
-  requestAnimationFrame(() => {
-    document.querySelectorAll('.parallax-img').forEach(img => {
-      const speed = parseFloat(img.getAttribute('data-speed'));
-      // Math: Current scroll * speed = how much the image "offsets"
-      const yPos = (scrollPos * speed);
-      
-      const rotation = img.style.transform.includes('rotate') 
-        ? img.style.transform.match(/rotate\(([^)]+)\)/)[0] 
-        : 'rotate(0deg)';
-      
-      // translate3d uses GPU acceleration for jitter-free movement
-      img.style.transform = `translate3d(0, ${yPos}px, 0) ${rotation}`;
+    <div class="container position-relative" style="z-index: 1;">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+          <div class="mb-4">
+            <span class="badge border border-success text-success px-3 py-2 mb-3 font-monospace">
+              <span class="status-pulse"></span> SYSTEM_READY: ACCEPTING_NEW_QUERIES
+            </span>
+            <h2 class="display-5 fw-bold mb-3">Ready to Engineer or Learn?</h2>
+            <p class="lead opacity-75 mb-5">
+              Whether you need embedded and edge-intelligent systems, custom LoRaWAN integrations, geospatial
+              intelligence solutions, or structured training to build technical capacity, we engineer systems that scale
+              with your vision and strengthen long-term operational capability.
+            </p>
+          </div>
+
+          <div class="d-grid d-sm-flex justify-content-sm-center gap-3">
+            <a href="mailto:info@mte.com" class="btn btn-primary btn-lg px-5 fw-bold shadow-sm">
+              INITIALIZE PROJECT <i class="fa-solid fa-terminal ms-2"></i>
+            </a>
+            <a href="#" class="btn btn-outline-light btn-lg px-5 fw-bold">
+              VIEW CAPABILITIES
+            </a>
+          </div>
+
+          <div class="mt-5 pt-4 border-top border-secondary opacity-50">
+            <div class="row g-3 small font-monospace">
+              <div class="col-6 col-md-3">LATENCY: < 24ms</div>
+                  <div class="col-6 col-md-3">ENCRYPTION: AES-256</div>
+                  <div class="col-6 col-md-3">STATUS: ENCRYPTED</div>
+                  <div class="col-6 col-md-3">LOC: 0.0.0.0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <!-- Updated Footer (replace the existing footer) -->
+  <footer class="py-4 bg-dark text-light border-top border-secondary">
+    <div class="container text-center">
+      <p class="mb-1 fw-bold">MTE – Cyber‑Physical Systems Engineering & Digital Skills Training</p>
+      <small class="opacity-50">Embedded Systems • Edge Intelligence • IoT • GIS • Python Programming • Scratch
+        (Foundational) • Custom Software • Systems Integration</small>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    setInterval(() => {
+      document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
+    }, 1000);
+
+
+    const builtSystems = [
+      {
+        title: 'SafeSail Tracker',
+        desc: 'Emergency tracking system for water transport safety, using embedded IoT for real-time location reporting, alerts, and coordinated incident response. (Verified deployments: REF_TCM7R, REF_DONIG, REF_73BXV, REF_DZY64)',
+        tags: ['Embedded', 'IoT'],
+        link: 'projects/safesail/index.html',
+        specs: { "Controller": "ESP32-S3", "Radio": "LoRaWAN / GSM", "Power": "Solar-Buffered Li-Ion" }
+      },
+      {
+        title: 'BF‑4™ Biogas System',
+        desc: 'Household-scale waste-to-energy solution converting organic waste into biogas, with integrated system monitoring, operational control, and performance optimization. (Verified deployments: REF_UHKYO, REF_UQRCX, REF_ZELBB, REF_HCHS1)',
+        tags: ['Energy', 'Sustainability'],
+        link: 'projects/biogas/index.html',
+        specs: { "Volume": "4 cubic meters", "Sensors": "Pressure, Temp, CH4", "Alerts": "SMS Gateway" }
+      },
+      {
+        title: 'Mini Weather Station',
+        desc: 'Compact environmental monitoring system using distributed sensors for localized data collection, early warnings, and long-term environmental analysis. (Verified deployments: REF_18D8N, REF_UYMYK, REF_3ET02, REF_UH2LK)',
+        tags: ['Sensors', 'Data'],
+        link: 'projects/weather/index.html',
+        specs: { "Accuracy": "±0.3°C", "Log Interval": "15 Minutes", "Transmission": "WiFi / MQTT" }
+      }
+    ];
+    const ideasSystems = [
+      {
+        title: 'LoRa Mesh Agriculture',
+        desc: 'Distributed peer‑to‑peer sensor networks enabling decentralized farm intelligence, resilient data exchange, and autonomous environmental monitoring. (Refs: REF_6T6I6, REF_HHWU6, REF_4A6Z0, REF_CG39U)',
+        tags: ['R&D', 'AgriTech'],
+        link: 'ideas/lora-agri/index.html',
+        specs: { "Topology": "Dynamic Mesh", "Range": "5km per node", "Protocol": "LoRa Layer 2" }
+      },
+      {
+        title: 'GIS-Driven Systems Intelligence',
+        desc: 'Advanced spatial data analysis pipelines supporting infrastructure oversight, environmental monitoring, and cyber-physical system planning. (Refs: REF_HG70C, REF_VCPO0, REF_VFGDI, REF_7TGGJ)',
+        tags: ['GIS', 'Analysis'],
+        link: 'ideas/gis-3d/index.html',
+        specs: { "Engine": "Three.js / WebGL", "Input": "GeoJSON / LiDAR", "Processing": "Serverless AWS" }
+      },
+      {
+        title: 'School Weather Network',
+        desc: 'Inter-school sensor network enabling shared environmental data, collaborative monitoring, and applied educational research. (Refs: REF_1E39O, REF_WR6GH, REF_VDYBP, REF_8AO7N)',
+        tags: ['Network', 'Education'],
+        link: 'ideas/school-net/index.html',
+        specs: { "API": "GraphQL", "Nodes": "Raspberry Pi Zero 2W", "Security": "JWT Authentication" }
+      }
+    ];
+    const tagStyles = {
+      'Embedded': { class: 'bg-primary text-white', icon: 'fa-microchip' },
+      'IoT': { class: 'bg-info text-dark', icon: 'fa-rss' },
+      'Energy': { class: 'bg-success text-white', icon: 'fa-bolt' },
+      'Sustainability': { class: 'bg-warning text-dark', icon: 'fa-leaf' },
+      'Sensors': { class: 'bg-danger text-white', icon: 'fa-gauge-high' },
+      'R&D': { class: 'bg-dark text-white', icon: 'fa-flask' },
+      'AgriTech': { class: 'bg-success text-white', icon: 'fa-seedling' },
+      'GIS': { class: 'bg-primary text-white', icon: 'fa-map-location-dot' },
+      'Data': { class: 'bg-secondary text-white', icon: 'fa-database' },
+      'Network': { class: 'bg-info text-dark', icon: 'fa-network-wired' },
+      'Education': { class: 'bg-light text-dark border', icon: 'fa-graduation-cap' }
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
+    }, { threshold: 0.1 });
+
+    const modalEl = document.getElementById('specsModal');
+    // create a single Bootstrap Modal instance and reuse it
+    const modalInstance = new bootstrap.Modal(modalEl, { backdrop: true });
+    // set a global flag so auto-scroll code can pause when a modal is open
+    window.autoScrollUserPause = false;
+    modalEl.addEventListener('show.bs.modal', () => { window.autoScrollUserPause = true; });
+    modalEl.addEventListener('hidden.bs.modal', () => {
+      window.autoScrollUserPause = false;
+      // guard: remove any leftover backdrop elements and modal-open body class
+      try {
+        document.querySelectorAll('.modal-backdrop').forEach(n => n.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.paddingRight = '';
+      } catch (e) {
+        console.error('cleanup modal backdrop failed', e);
+      }
     });
-  });
-});
 
-const builtSystems = [
-  { 
-    title: 'SafeSail Tracker', 
-    desc: 'Emergency tracking for water transport safety.', 
-    tags: ['Embedded', 'IoT'], 
-    link: 'projects/safesail/index.html',
-    specs: { "Controller": "ESP32-S3", "Radio": "LoRaWAN / GSM", "Power": "Solar-Buffered Li-Ion" } 
-  },
-  { 
-    title: 'BF‑4™ Biogas System', 
-    desc: 'Household waste‑to‑energy solution.', 
-    tags: ['Energy', 'Sustainability'], 
-    link: 'projects/biogas/index.html',
-    specs: { "Volume": "4 cubic meters", "Sensors": "Pressure, Temp, CH4", "Alerts": "SMS Gateway" } 
-  },
-  { 
-    title: 'Mini Weather Station', 
-    desc: 'Environmental monitoring & early warnings.', 
-    tags: ['Sensors', 'Data'], 
-    link: 'projects/weather/index.html',
-    specs: { "Accuracy": "±0.3°C", "Log Interval": "15 Minutes", "Transmission": "WiFi / MQTT" } 
-  },
-  { 
-    title: 'Meds & Food Integrity', 
-    desc: 'Food safety intelligence engine.', 
-    tags: ['Sensors', 'Data'], 
-    link: 'projects/meds_and_food/index.html',
-    specs: { "Sensors": "Food, Drug, Allergen", "Data": "Real-Time", "Alerts": "AI-Driven" } 
-  }
-];
+    function openSpecs(title, specsJson) {
+      const specs = JSON.parse(decodeURIComponent(specsJson));
+      document.getElementById('modalTitle').innerText = `${title} // Technical Data`;
+      let html = `<div class="table-responsive"><table class="table table-sm border-0"><tbody>`;
+      for (const [key, value] of Object.entries(specs)) {
+        html += `<tr><td class="fw-bold text-muted text-uppercase py-2" style="font-size: 0.7rem;">${key}</td><td class="font-monospace py-2">${value}</td></tr>`;
+      }
+      html += `</tbody></table></div>`;
+      document.getElementById('modalContent').innerHTML = html;
+      // show the modal via the shared instance to avoid leftover backdrops
+      modalInstance.show();
+    }
 
-const ideasSystems = [
-  { 
-    title: 'LoRa Mesh Agriculture', 
-    desc: 'Distributed peer‑to‑peer farm intelligence.', 
-    tags: ['R&D', 'AgriTech'], 
-    link: 'ideas/lora-agri/index.html',
-    specs: { "Topology": "Dynamic Mesh", "Range": "5km per node", "Protocol": "LoRa Layer 2" } 
-  },
-  { 
-    title: 'GIS → 3D Simulation', 
-    desc: 'Geospatial data into interactive 3D spaces.', 
-    tags: ['GIS', 'Simulation'], 
-    link: 'ideas/gis-3d/index.html',
-    specs: { "Engine": "Three.js / WebGL", "Input": "GeoJSON / LiDAR", "Processing": "Serverless AWS" } 
-  },
-  { 
-    title: 'School Weather Network', 
-    desc: 'Inter‑school sensor data sharing platform.', 
-    tags: ['Network', 'Education'], 
-    link: 'ideas/school-net/index.html',
-    specs: { "API": "GraphQL", "Nodes": "Raspberry Pi Zero 2W", "Security": "JWT Authentication" } 
-  }
-];
+    function renderCards(container, systems, isBuilt = false) {
+      container.innerHTML = '';
+      if (!systems || systems.length === 0) return;
+      // Render the provided systems list once. makeInfinite() will duplicate the set once to create a seamless loop.
+      const displayList = [...systems];
 
-const tagStyles = {
-  'Embedded': { class: 'bg-primary text-white', icon: 'fa-microchip' },
-  'IoT': { class: 'bg-info text-dark', icon: 'fa-rss' },
-  'Energy': { class: 'bg-success text-white', icon: 'fa-bolt' },
-  'Sustainability': { class: 'bg-warning text-dark', icon: 'fa-leaf' },
-  'Sensors': { class: 'bg-danger text-white', icon: 'fa-gauge-high' },
-  'R&D': { class: 'bg-dark text-white', icon: 'fa-flask' },
-  'AgriTech': { class: 'bg-success text-white', icon: 'fa-seedling' },
-  'GIS': { class: 'bg-primary text-white', icon: 'fa-map-location-dot' },
-  'Data': { class: 'bg-secondary text-white', icon: 'fa-database' },
-  'Network': { class: 'bg-info text-dark', icon: 'fa-network-wired' },
-  'Education': { class: 'bg-light text-dark border', icon: 'fa-graduation-cap' }
-};
+      displayList.forEach(system => {
+        const card = document.createElement('div');
+        card.className = 'card shadow-sm h-100';
+        const tagsHtml = system.tags ? system.tags.map(t => {
+          const style = tagStyles[t] || { class: 'bg-light text-dark border', icon: 'fa-tag' };
+          return `<span class="badge ${style.class} tag me-1"><i class="fa-solid ${style.icon} me-1"></i>${t}</span>`;
+        }).join('') : '';
+        const specsData = encodeURIComponent(JSON.stringify(system.specs || {}));
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('in-view'); });
-}, { threshold: 0.1 });
-
-const modalEl = document.getElementById('specsModal');
-modalEl.addEventListener('show.bs.modal', () => document.querySelectorAll('.scroll-track').forEach(t => t.classList.add('stop-scroll')));
-modalEl.addEventListener('hidden.bs.modal', () => document.querySelectorAll('.scroll-track').forEach(t => t.classList.remove('stop-scroll')));
-
-function openSpecs(title, specsJson) {
-  const specs = JSON.parse(decodeURIComponent(specsJson));
-  document.getElementById('modalTitle').innerText = `${title} // Technical Data`;
-  let html = `<div class="table-responsive"><table class="table table-sm border-0"><tbody>`;
-  for (const [key, value] of Object.entries(specs)) {
-    html += `<tr><td class="fw-bold text-muted text-uppercase py-2" style="font-size: 0.7rem;">${key}</td><td class="font-monospace py-2">${value}</td></tr>`;
-  }
-  html += `</tbody></table></div>`;
-  document.getElementById('modalContent').innerHTML = html;
-  new bootstrap.Modal(modalEl).show();
-}
-
-function renderCards(container, systems, isBuilt = false) {
-  container.innerHTML = '';
-  if (!systems || systems.length === 0) return;
-  let displayList = [...systems];
-  while (displayList.length < 12) displayList = [...displayList, ...systems];
-
-  displayList.forEach(system => {
-    const card = document.createElement('div');
-    card.className = 'card shadow-sm h-100';
-    const tagsHtml = system.tags ? system.tags.map(t => {
-      const style = tagStyles[t] || { class: 'bg-light text-dark border', icon: 'fa-tag' };
-      return `<span class="badge ${style.class} tag me-1"><i class="fa-solid ${style.icon} me-1"></i>${t}</span>`;
-    }).join('') : '';
-    const specsData = encodeURIComponent(JSON.stringify(system.specs || {}));
-
-    card.innerHTML = `
+        card.innerHTML = `
       <div class="card-body d-flex flex-column">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h6 class="text-uppercase text-muted fw-bold m-0" style="font-size: 0.6rem; letter-spacing: 1px;">
@@ -622,7 +1146,7 @@ function renderCards(container, systems, isBuilt = false) {
         <div class="mt-2 mb-3">${tagsHtml}</div>
         
         <div class="d-flex gap-2">
-          <button onclick="openSpecs('${system.title}', '${specsData}')" class="btn btn-sm ${isBuilt ? 'btn-dark' : 'btn-outline-dark'} flex-grow-1 fw-bold">
+          <button class="btn btn-sm ${isBuilt ? 'btn-dark' : 'btn-outline-dark'} flex-grow-1 fw-bold open-specs-btn">
             ${isBuilt ? 'SPECS' : 'PROPOSAL'}
           </button>
           <a href="${system.link}" class="btn btn-sm ${isBuilt ? 'btn-outline-primary' : 'btn-outline-info'} fw-bold" title="View Full Project" target="_blank">
@@ -631,40 +1155,218 @@ function renderCards(container, systems, isBuilt = false) {
         </div>
       </div>
     `;
-    container.appendChild(card);
-    observer.observe(card);
-  });
-}
+        container.appendChild(card);
+        // attach specs data/listener safely to avoid inline-attribute encoding issues
+        try {
+          const btn = card.querySelector('.open-specs-btn');
+          if (btn) {
+            btn.dataset.specs = specsData;
+            btn.dataset.title = system.title;
+            btn.addEventListener('click', () => {
+              openSpecs(btn.dataset.title, btn.dataset.specs);
+            });
+          }
+        } catch (err) {
+          // ignore, leave inline behavior as fallback
+          console.error('specs button attach failed', err);
+        }
+        observer.observe(card);
+      });
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const builtTrack = document.getElementById('built-track');
-  const ideasTrack = document.getElementById('ideas-track');
-  
-  renderCards(builtTrack, builtSystems, true);
-  renderCards(ideasTrack, ideasSystems, false);
+    // Make a track continuous by duplicating its children once and setting initial scroll position
+    function makeInfinite(track) {
+      if (!track) return;
+      // avoid duplicating multiple times
+      if (track.dataset.infinite === '1') return;
+      const parent = track.closest('.scroll-row');
+      const originals = Array.from(track.children);
+      if (!originals.length) return;
+      // measure original single-sequence width before cloning
+      const originalWidth = track.scrollWidth;
+      if (!originalWidth) return;
 
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const parentBar = e.target.closest('.filter-bar');
-      const targetType = parentBar.dataset.target;
-      const tag = btn.dataset.tag;
-      
-      parentBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      // Append clones until track is at least twice the visible width (to ensure seamless loop)
+      let clones = 0;
+      const maxClones = 8;
+      while (track.scrollWidth < parent.clientWidth * 2 && clones < maxClones) {
+        originals.forEach(n => {
+          const clone = n.cloneNode(true);
+          track.appendChild(clone);
+          observer.observe(clone);
+        });
+        clones++;
+      }
 
-      const track = targetType === 'built' ? builtTrack : ideasTrack;
-      const dataSet = targetType === 'built' ? builtSystems : ideasSystems;
-      const filtered = tag === 'all' ? dataSet : dataSet.filter(s => s.tags.includes(tag));
-      
-      track.style.animation = 'none';
-      renderCards(track, filtered, targetType === 'built');
-      setTimeout(() => track.style.animation = '', 10);
+      // mark as infinite and store the original single sequence width
+      track.dataset.infinite = '1';
+      requestAnimationFrame(() => {
+        parent._infiniteSingleWidth = originalWidth;
+        parent._infiniteClones = clones;
+        // reset transform start
+        track.style.transform = 'translateX(0px)';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const builtTrack = document.getElementById('built-track');
+      const ideasTrack = document.getElementById('ideas-track');
+
+      renderCards(builtTrack, builtSystems, true);
+      renderCards(ideasTrack, ideasSystems, false);
+      // initialize infinite looping for both tracks and enable autoplay
+      makeInfinite(builtTrack);
+      makeInfinite(ideasTrack);
+      builtTrack.closest('.scroll-row')._autoPlay = true;
+      ideasTrack.closest('.scroll-row')._autoPlay = true;
+
+      // Delegated click handlers so cloned cards (from makeInfinite) still open the modal
+      try {
+        if (builtTrack) {
+          builtTrack.addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('.open-specs-btn');
+            if (btn) openSpecs(btn.dataset.title, btn.dataset.specs);
+          });
+        }
+        if (ideasTrack) {
+          ideasTrack.addEventListener('click', (e) => {
+            const btn = e.target.closest && e.target.closest('.open-specs-btn');
+            if (btn) openSpecs(btn.dataset.title, btn.dataset.specs);
+          });
+        }
+      } catch (err) { console.error('delegated specs handler failed', err); }
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const parentBar = e.target.closest('.filter-bar');
+          const targetType = parentBar.dataset.target;
+          const tag = btn.dataset.tag;
+
+          parentBar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          const track = targetType === 'built' ? builtTrack : ideasTrack;
+          const dataSet = targetType === 'built' ? builtSystems : ideasSystems;
+          const filtered = tag === 'all' ? dataSet : dataSet.filter(s => s.tags.includes(tag));
+
+          track.style.animation = 'none';
+          renderCards(track, filtered, targetType === 'built');
+          setTimeout(() => {
+            track.style.animation = '';
+            const parentRow = track.closest('.scroll-row');
+            if (tag === 'all') {
+              // restore transform-based infinite loop
+              track.dataset.infinite = '';
+              parentRow.style.overflowX = 'hidden';
+              parentRow._autoPlay = true;
+              // reset any sizing we changed for filtered view
+              track.style.width = '';
+              track.style.justifyContent = '';
+              track.style.transform = 'translateX(0)';
+              makeInfinite(track);
+            } else {
+              // filtered results: disable autoplay and allow native scrolling
+              parentRow._autoPlay = false;
+              // clear transform and make the track take full width so items can be evenly spaced
+              track.style.transform = 'translateX(0)';
+              track.style.width = '100%';
+              track.style.justifyContent = 'space-evenly';
+              track.style.flexWrap = 'nowrap';
+              parentRow.style.overflowX = 'auto';
+            }
+          }, 10);
+        });
+      });
+
+      // Add pointer drag + transform-based auto-scroll support
+      document.querySelectorAll('.scroll-row').forEach(sr => {
+        const track = sr.querySelector('.scroll-track');
+        if (!track) return;
+
+        // per-track state
+        let isDown = false;
+        let startX = 0;
+        let startOffset = 0;
+        let offset = 0; // 0..singleWidth
+        let isUserInteracting = false;
+        let resumeTimeout = null;
+        const singleWidth = () => sr._infiniteSingleWidth || track.scrollWidth;
+        const dir = track.classList.contains('reverse') ? -1 : 1;
+        const speedPxPerSec = track.classList.contains('reverse') ? 40 : 60; // tweakable speed
+
+        function setOffset(v) {
+          const sw = singleWidth() || 1;
+          // normalize into [0, sw)
+          offset = ((v % sw) + sw) % sw;
+          track.style.transform = `translateX(${-offset}px)`;
+        }
+
+        function pauseAutoScrollFor(ms = 2500) {
+          isUserInteracting = true;
+          if (resumeTimeout) clearTimeout(resumeTimeout);
+          resumeTimeout = setTimeout(() => { isUserInteracting = false; }, ms);
+        }
+
+        sr.addEventListener('pointerdown', (e) => {
+          // If the pointer started on an interactive element, don't begin a drag — allow clicks to go through.
+          const interactive = e.target && e.target.closest && e.target.closest('a, button, input, select, textarea, .open-specs-btn');
+          if (interactive) {
+            pauseAutoScrollFor();
+            return;
+          }
+          isDown = true;
+          sr.classList.add('dragging');
+          startX = e.pageX;
+          startOffset = offset;
+          sr.setPointerCapture && sr.setPointerCapture(e.pointerId);
+          pauseAutoScrollFor();
+        });
+
+        sr.addEventListener('pointermove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const dx = e.pageX - startX;
+          // dragging right should move content right => decrease offset
+          setOffset(startOffset - dx);
+          pauseAutoScrollFor();
+        });
+
+        ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => {
+          sr.addEventListener(ev, (e) => {
+            isDown = false;
+            sr.classList.remove('dragging');
+            try { sr.releasePointerCapture && sr.releasePointerCapture(e.pointerId); } catch (err) { }
+            pauseAutoScrollFor();
+          });
+        });
+
+        // wheel/touch gestures
+        sr.addEventListener('wheel', (e) => { setOffset(offset + e.deltaY); pauseAutoScrollFor(); }, { passive: true });
+        sr.addEventListener('touchstart', (e) => { pauseAutoScrollFor(); }, { passive: true });
+
+        // RAF-driven transform animation
+        let last = performance.now();
+        (function rafLoop(now) {
+          const dt = (now - last) / 1000; last = now;
+          const sw = singleWidth();
+          const parentRow = sr;
+          const autoPlayEnabled = (parentRow._autoPlay !== false);
+          if (autoPlayEnabled && !isUserInteracting && !window.autoScrollUserPause && sw > 0) {
+            const delta = speedPxPerSec * dt * dir;
+            setOffset(offset + delta);
+          }
+          requestAnimationFrame(rafLoop);
+        })(last);
+      });
+      window.dispatchEvent(new Event('scroll'));
     });
-  });
-  // Trigger one scroll event to position parallax items correctly on load
-window.dispatchEvent(new Event('scroll'));
-});
-</script>
+  </script>
 
+  <a href="#" class="position-fixed bottom-0 end-0 m-3 btn btn-primary rounded-circle shadow"
+    style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; z-index:10000;"
+    title="Back to Top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </a>
 </body>
+
 </html>
