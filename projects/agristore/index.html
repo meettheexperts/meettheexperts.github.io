@@ -47,6 +47,23 @@
   </div>
 </nav>
 
+<!-- Trust Badges -->
+<div class="bg-light border-bottom py-3">
+  <div class="container">
+    <div class="row text-center g-3">
+      <div class="col-md-4">
+        <strong>✅ 100+ Happy Customers</strong><br><small class="text-muted">in Kampala & suburbs</small>
+      </div>
+      <div class="col-md-4">
+        <strong>🚚 Fresh Delivery</strong><br><small class="text-muted">Same/next day within Kampala</small>
+      </div>
+      <div class="col-md-4">
+        <strong>🌾 Direct from Farm</strong><br><small class="text-muted">No middlemen, pure quality</small>
+      </div>
+    </div>
+  </div>
+</div>
+
 <section class="container my-4">
 
   <input type="text" id="searchInput" class="form-control mb-3"
@@ -63,6 +80,62 @@
 
   <div class="row g-3" id="productGrid"></div>
 
+</section>
+
+<!-- About Us & Testimonials Section -->
+<section class="bg-light py-5 my-5">
+  <div class="container">
+    <h2 class="text-center mb-4">About Our Farm & What Customers Say</h2>
+    
+    <div class="row g-4">
+      <!-- About Us -->
+      <div class="col-md-6">
+        <h5>🎬 Meet Our Farm</h5>
+        <p class="text-muted">Watch a quick tour of our farm and how we grow the freshest livestock & produce for you.</p>
+        <div style="background: #e9ecef; border-radius: 8px; padding: 40px; text-align: center; margin-bottom: 1rem;">
+          <p class="mb-0 text-muted">📹 About Us Video (30–60 sec)</p>
+          <small class="text-muted">Embed your farm tour video here or YouTube link</small><br>
+          <a href="#" class="btn btn-sm btn-success mt-2">📺 Watch Now</a>
+        </div>
+        <p class="text-muted small"><strong>📍 Location:</strong> Based in Kampala, Uganda<br>Direct from our farm to your home.</p>
+      </div>
+      
+      <!-- Testimonials -->
+      <div class="col-md-6">
+        <h5>⭐ What Our Customers Say</h5>
+        
+        <div class="card mb-3 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="mb-2">
+              <strong style="color: #ffc107;">★★★★★</strong> <small class="text-muted">5/5 stars</small>
+            </div>
+            <p class="card-text mb-2">"The freshest pork I've ever bought! Delivered the same day, and it's so clean. Highly recommended!"</p>
+            <small class="text-muted"><strong>— Fatima M.</strong>, Kampala</small>
+          </div>
+        </div>
+        
+        <div class="card mb-3 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="mb-2">
+              <strong style="color: #ffc107;">★★★★★</strong> <small class="text-muted">5/5 stars</small>
+            </div>
+            <p class="card-text mb-2">"Best chicken in the market. My whole family loves it. Prices are fair too!"</p>
+            <small class="text-muted"><strong>— James K.</strong>, Kasubi</small>
+          </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="mb-2">
+              <strong style="color: #ffc107;">★★★★★</strong> <small class="text-muted">5/5 stars</small>
+            </div>
+            <p class="card-text mb-2">"Love the matooke! Always fresh and perfect quantity. I order every week now."</p>
+            <small class="text-muted"><strong>— Grace N.</strong>, Makindye</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <footer class="bg-light py-3 text-center">
@@ -155,6 +228,9 @@ function renderProducts() {
               <button data-seller="256751200704" data-item="${(item.id||safeId)}" data-name="${(item.name||'').replace(/"/g,'')}" class="btn btn-outline-secondary btn-sm track-call-btn">
                 📞 Call Seller
               </button>
+              <button data-name="${(item.name||'').replace(/"/g,'')}" data-price="${priceDisplay}" data-seller="256751200704" class="btn btn-outline-info btn-sm share-product-btn">
+                📤 Share Deal
+              </button>
             </div>
           </div>
         </div>
@@ -178,6 +254,15 @@ function renderProducts() {
       const item = btn.dataset.item;
       const name = btn.dataset.name;
       trackAndRedirect({type:'call', item:item, seller:seller, name:name}, `tel:${seller}`, false);
+    });
+  });
+
+  document.querySelectorAll('.share-product-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const name = btn.dataset.name;
+      const price = btn.dataset.price;
+      const seller = btn.dataset.seller;
+      shareProduct(name, price, seller);
     });
   });
 }
@@ -246,6 +331,12 @@ function sendWhatsApp(name, id, price, seller) {
   const text = `Hello! I'd like to order:\n\n*Item:* ${name}\n*Quantity:* ${qty}\n*Price:* ${price}\n\nIs this still available?`;
   const waUrl = `https://wa.me/${seller}?text=${encodeURIComponent(text)}`;
   trackAndRedirect({type:'wa', item:id||safeId, seller:seller, name:name, quantity:qty}, waUrl, true);
+}
+
+function shareProduct(name, price, seller) {
+  const text = `🌾 Check out this fresh product from Our Farm!\n\n*${name}*\n${price}\n\nOrder now: https://wa.me/${seller}?text=Hi%20I%20saw%20${encodeURIComponent(name)}%20for%20${encodeURIComponent(price)}%20-%20is%20it%20available?`;
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+  trackAndRedirect({type:'share', item:name, seller:seller, name:name}, waUrl, true);
 }
 </script>
 </body>
