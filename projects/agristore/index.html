@@ -197,34 +197,46 @@ filterButtons.forEach(btn => {
 });
 
 function trackAndRedirect(payload, redirectUrl, openInBlank = true) {
-  // add client details
   payload.ts = new Date().toISOString();
   payload.page = window.location.href;
   payload.referrer = document.referrer || '';
   payload.ua = navigator.userAgent || '';
-  payload.quantity = payload.quantity || (function(){
-    if (!payload.item) return '';
-    const qtyEl = document.getElementById(`qty-${sanitizeId(payload.item)}`);
-    return qtyEl ? qtyEl.value : '';
-  })();
 
-  // Use an image GET ping to avoid CORS preflight and response header issues with Apps Script.
-  // doGet(e) in the Apps Script will receive the parameters via e.parameter.
+  // Get quantity safely
+  let quantity = '1';
+  if (payload.item) {
+    const qtyEl = document.getElementById(`qty-${sanitizeId(payload.item)}`);
+    if (qtyEl) quantity = qtyEl.value;
+  }
+  payload.quantity = quantity;
+
+  // Simple dev debounce (optional - remove in production)
+  if (window.lastTrack && Date.now() - window.lastTrack < 1200) return;
+  window.lastTrack = Date.now();
+
   try {
-    const params = new URLSearchParams();
-    Object.keys(payload).forEach(k => {
-      if (payload[k] !== undefined && payload[k] !== null) params.append(k, String(payload[k]));
-    });
-    // cache-buster
-    params.append('_', Date.now());
-    const img = new Image();
-    img.src = TRACK_URL + '?' + params.toString();
+    const params = new URLSearchParams(Object.entries(payload));
+    const fullUrl = TRACK_URL + '?' + params.toString();
+
+    if (navigator.sendBeacon) {
+      // Preferred - survives page unload. Note: sendBeacon usually takes (url, body);
+      // using the URL with query params is acceptable for a simple ping.
+      try { navigator.sendBeacon(fullUrl); } catch (e) { /* fallthrough to img fallback */ }
+    } else {
+      // Fallback (old browsers)
+      const img = new Image();
+      img.src = fullUrl + (fullUrl.includes('?') ? '&' : '?') + '_=' + Date.now();
+    }
   } catch (err) {
-    console.warn('tracking ping failed', err);
+    console.warn('Tracking failed', err);
   }
 
-  if (openInBlank) window.open(redirectUrl, '_blank');
-  else window.location.href = redirectUrl;
+  // Do the actual redirect/action
+  if (openInBlank) {
+    window.open(redirectUrl, '_blank', 'noopener,noreferrer');
+  } else {
+    window.location.href = redirectUrl;
+  }
 }
 
 function sendWhatsApp(name, id, price, seller) {
