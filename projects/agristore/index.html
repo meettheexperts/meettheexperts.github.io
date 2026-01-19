@@ -71,6 +71,9 @@
 
 <script>
 const SHEET_URL = "https://opensheet.elk.sh/1YcwfYih0rUUqspsTMxjrdlMS5M1Fi5xBNIaLtFCoPBQ/Sheet1";
+// Deploy an Apps Script web app that accepts POST and logs into a sheet.
+// Replace with your deployed Apps Script URL below (see APPS_SCRIPT_DOPOST.md)
+const TRACK_URL = "https://script.google.com/macros/s/AKfycbw4neByedX8FqNi_WGg_h2ulkbCC-9evlIFSIZffaAT8oZFIeaGjmXpY4EVc9aveZPKkw/exec";
 const grid = document.getElementById("productGrid");
 const searchInput = document.getElementById("searchInput");
 const filterButtons = document.querySelectorAll(".filter-btn");
@@ -146,12 +149,12 @@ function renderProducts() {
 
           <div class="card-footer bg-white border-0 pt-0 pb-3 mt-auto">
             <div class="d-grid gap-2">
-              <button data-name="${(item.name||'').replace(/"/g,'')}" data-id="${safeId}" data-price="${priceDisplay}" class="btn btn-success fw-bold wa-order-btn">
+              <button data-name="${(item.name||'').replace(/"/g,'')}" data-id="${safeId}" data-price="${priceDisplay}" data-seller="256751200704" class="btn btn-success fw-bold wa-order-btn">
                 Order via WhatsApp
               </button>
-              <a href="tel:256XXXXXXXXX" class="btn btn-outline-secondary btn-sm">
+              <button data-seller="256751200704" data-item="${(item.id||safeId)}" data-name="${(item.name||'').replace(/"/g,'')}" class="btn btn-outline-secondary btn-sm track-call-btn">
                 📞 Call Seller
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -164,7 +167,17 @@ function renderProducts() {
       const name = btn.dataset.name;
       const id = btn.dataset.id;
       const price = btn.dataset.price;
-      sendWhatsApp(name, id, price);
+      const seller = btn.dataset.seller;
+      sendWhatsApp(name, id, price, seller);
+    });
+  });
+
+  document.querySelectorAll('.track-call-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const seller = btn.dataset.seller;
+      const item = btn.dataset.item;
+      const name = btn.dataset.name;
+      trackAndRedirect({type:'call', item:item, seller:seller, name:name}, `tel:${seller}`, false);
     });
   });
 }
@@ -183,12 +196,41 @@ filterButtons.forEach(btn => {
   });
 });
 
-function sendWhatsApp(name, id, price) {
-  const safeId = sanitizeId(id);
+async function trackAndRedirect(payload, redirectUrl, openInBlank = true) {
+  // add client details
+  payload.ts = new Date().toISOString();
+  payload.page = window.location.href;
+  payload.referrer = document.referrer || '';
+  payload.ua = navigator.userAgent || '';
+  payload.quantity = payload.quantity || (function(){
+    if (!payload.item) return '';
+    const qtyEl = document.getElementById(`qty-${sanitizeId(payload.item)}`);
+    return qtyEl ? qtyEl.value : '';
+  })();
+
+  try {
+    // best-effort POST; keepalive allowed for background on some browsers
+    await fetch(TRACK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      keepalive: true
+    });
+  } catch (err) {
+    console.warn('tracking failed', err);
+  }
+
+  if (openInBlank) window.open(redirectUrl, '_blank');
+  else window.location.href = redirectUrl;
+}
+
+function sendWhatsApp(name, id, price, seller) {
+  const safeId = sanitizeId(id || name || '');
   const qtyEl = document.getElementById(`qty-${safeId}`);
   const qty = qtyEl ? qtyEl.value : 1;
   const text = `Hello! I'd like to order:\n\n*Item:* ${name}\n*Quantity:* ${qty}\n*Price:* ${price}\n\nIs this still available?`;
-  window.open(`https://wa.me/256XXXXXXXXX?text=${encodeURIComponent(text)}`, '_blank');
+  const waUrl = `https://wa.me/${seller}?text=${encodeURIComponent(text)}`;
+  trackAndRedirect({type:'wa', item:id||safeId, seller:seller, name:name, quantity:qty}, waUrl, true);
 }
 </script>
 </body>
