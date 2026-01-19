@@ -196,7 +196,7 @@ filterButtons.forEach(btn => {
   });
 });
 
-async function trackAndRedirect(payload, redirectUrl, openInBlank = true) {
+function trackAndRedirect(payload, redirectUrl, openInBlank = true) {
   // add client details
   payload.ts = new Date().toISOString();
   payload.page = window.location.href;
@@ -208,16 +208,19 @@ async function trackAndRedirect(payload, redirectUrl, openInBlank = true) {
     return qtyEl ? qtyEl.value : '';
   })();
 
+  // Use an image GET ping to avoid CORS preflight and response header issues with Apps Script.
+  // doGet(e) in the Apps Script will receive the parameters via e.parameter.
   try {
-    // best-effort POST; keepalive allowed for background on some browsers
-    await fetch(TRACK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      keepalive: true
+    const params = new URLSearchParams();
+    Object.keys(payload).forEach(k => {
+      if (payload[k] !== undefined && payload[k] !== null) params.append(k, String(payload[k]));
     });
+    // cache-buster
+    params.append('_', Date.now());
+    const img = new Image();
+    img.src = TRACK_URL + '?' + params.toString();
   } catch (err) {
-    console.warn('tracking failed', err);
+    console.warn('tracking ping failed', err);
   }
 
   if (openInBlank) window.open(redirectUrl, '_blank');
