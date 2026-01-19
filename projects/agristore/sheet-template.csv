@@ -1,0 +1,6 @@
+id,name,category,quantity,unit,available,new,image,notes,price
+pig-01,Pig Boar,Livestock,5,heads,TRUE,FALSE,https://via.placeholder.com/400x300?text=Pig,Ready for breeding,120000
+chicken-01,Free-range Chicken,Poultry,30,birds,TRUE,TRUE,https://via.placeholder.com/400x300?text=Chicken,Organic layers,15000
+matooke-01,Matooke (Bunches),Crops,100,bunches,TRUE,FALSE,https://via.placeholder.com/400x300?text=Matooke,Green and fresh,4000
+rice-01,White Rice,Crops,200,kg,TRUE,FALSE,https://via.placeholder.com/400x300?text=Rice,Cleaned and bagged,5000
+goat-01,Goat (Meat),Livestock,8,heads,FALSE,FALSE,https://via.placeholder.com/400x300?text=Goat,Ready for slaughter,80000
