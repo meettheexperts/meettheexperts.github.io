@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Inventory Upload</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 2rem;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card p-4">
+                    <h3 class="text-center mb-4">Add New Product</h3>
+
+                    <form id="productForm">
+                        <div class="mb-3">
+                            <label class="form-label">Product Name</label>
+                            <input type="text" id="name" class="form-control" placeholder="e.g. Wireless Mouse"
+                                required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category</label>
+                                <input type="text" id="category" class="form-control" placeholder="Electronics">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Price</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" id="price" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Quantity</label>
+                                <input type="number" id="quantity" class="form-control" value="1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Unit</label>
+                                <input type="text" id="unit" class="form-control" placeholder="pcs / kg">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Product Image</label>
+                            <input type="file" id="imageFile" class="form-control" accept="image/*" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Notes</label>
+                            <textarea id="notes" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-4 mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="available" checked>
+                                <label class="form-check-label">Available</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="isNew" checked>
+                                <label class="form-check-label">New Item</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn btn-primary w-100 py-2">
+                            <span class="spinner-border spinner-border-sm loading" id="loader"></span>
+                            Upload Product
+                        </button>
+                    </form>
+
+                    <div id="statusMsg" class="mt-3 text-center"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const POSTIMAGE_API_KEY = '6181062a57cf3321d1ba8b237509fb4b';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4neByedX8FqNi_WGg_h2ulkbCC-9evlIFSIZffaAT8oZFIeaGjmXpY4EVc9aveZPKkw/exec';
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = document.getElementById('submitBtn');
+            const loader = document.getElementById('loader');
+            const status = document.getElementById('statusMsg');
+
+            // UI State: Loading
+            btn.disabled = true;
+            loader.style.display = 'inline-block';
+            status.innerHTML = '<span class="text-muted">Uploading image to Postimages...</span>';
+
+            try {
+                const imageFile = document.getElementById('imageFile').files[0];
+                if (!imageFile) throw new Error('Please select an image file.');
+
+                // Postimages API v1 requires a unique session ID for each upload
+                const session = [...Array(32)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+
+                // 1. Upload to Postimages
+                const postimgFormData = new FormData();
+                postimgFormData.append('upload', imageFile);
+                postimgFormData.append('key', POSTIMAGE_API_KEY);
+                postimgFormData.append('upload_session', session);
+                postimgFormData.append('numfiles', '1');
+                postimgFormData.append('gallery', '');
+                postimgFormData.append('adult', '0');
+
+                // We target /1/upload with ?output=json to get a parseable response
+                const postimgRes = await fetch('https://api.postimage.org/1/upload', {
+                    method: 'POST',
+                    body: postimgFormData
+                });
+
+                if (!postimgRes.ok) {
+                    const text = await postimgRes.text();
+                    throw new Error(`Postimages error ${postimgRes.status}: ${text}`);
+                }
+                const postimgData = await postimgRes.json();
+
+                // Postimages returns the page link in 'url' and raw image link in 'direct'
+                const imageUrl = postimgData.direct || postimgData.url;
+                if (!imageUrl) throw new Error('Failed to get URL from Postimages.');
+
+                status.innerHTML = '<span class="text-info">Image uploaded! Updating Sheet...</span>';
+
+                // 2. Prepare Payload for your Apps Script (Matches your Excel columns)
+                const sheetPayload = {
+                    action: 'PRODUCT_UPLOAD',
+                    id: 'PROD-' + Date.now(),
+                    name: document.getElementById('name').value,
+                    category: document.getElementById('category').value,
+                    quantity: document.getElementById('quantity').value,
+                    unit: document.getElementById('unit').value,
+                    available: document.getElementById('available').checked ? 'Yes' : 'No',
+                    new: document.getElementById('isNew').checked ? 'Yes' : 'No',
+                    image: imageUrl,
+                    notes: document.getElementById('notes').value,
+                    price: document.getElementById('price').value
+                };
+
+                // 3. Send to Google Apps Script
+                await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Important: Google Apps Script redirects
+                    body: JSON.stringify(sheetPayload)
+                });
+
+                status.innerHTML = '<div class="alert alert-success">Product added successfully!</div>';
+                document.getElementById('productForm').reset();
+
+            } catch (error) {
+                console.error(error);
+                status.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+
+
+</body>
+
+</html>
