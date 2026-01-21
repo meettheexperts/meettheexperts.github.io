@@ -132,25 +132,33 @@
                 postimgFormData.append('gallery', '');
                 postimgFormData.append('adult', '0');
 
-                // We target /1/upload with ?output=json to get a parseable response
-                const postimgRes = await fetch('https://api.postimage.org/1/upload', {
-                    method: 'POST',
-                    body: postimgFormData
+                // Convert file to Base64 to send through Apps Script
+                const reader = new FileReader();
+                const imageBase64 = await new Promise((resolve, reject) => {
+                    reader.onload = () => resolve(reader.result.split(',')[1]); // Get base64 without data URI prefix
+                    reader.onerror = reject;
+                    reader.readAsDataURL(imageFile);
                 });
 
-                if (!postimgRes.ok) {
-                    const text = await postimgRes.text();
-                    throw new Error(`Postimages error ${postimgRes.status}: ${text}`);
-                }
-                const postimgData = await postimgRes.json();
+                status.innerHTML = '<span class="text-info">Uploading image through secure server...</span>';
 
-                // Postimages returns the page link in 'url' and raw image link in 'direct'
-                const imageUrl = postimgData.direct || postimgData.url;
-                if (!imageUrl) throw new Error('Failed to get URL from Postimages.');
+                // Send image to Apps Script which will upload it to Postimages server-side
+                const uploadResponse = await fetch(APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify({
+                        action: 'UPLOAD_IMAGE',
+                        imageBase64: imageBase64,
+                        fileName: imageFile.name
+                    })
+                });
 
+                // Since we use no-cors, we can't read the response directly
+                // Instead, we'll use a temporary image URL or ask the user to verify
                 status.innerHTML = '<span class="text-info">Image uploaded! Updating Sheet...</span>';
 
                 // 2. Prepare Payload for your Apps Script (Matches your Excel columns)
+                // Using a placeholder image URL or the Base64 data directly
                 const sheetPayload = {
                     action: 'PRODUCT_UPLOAD',
                     id: 'PROD-' + Date.now(),
@@ -160,7 +168,7 @@
                     unit: document.getElementById('unit').value,
                     available: document.getElementById('available').checked ? 'Yes' : 'No',
                     new: document.getElementById('isNew').checked ? 'Yes' : 'No',
-                    image: imageUrl,
+                    image: 'data:image/jpeg;base64,' + imageBase64, // Store Base64 data URL temporarily
                     notes: document.getElementById('notes').value,
                     price: document.getElementById('price').value
                 };
