@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplified Bootstrap Builder Template</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { display: flex; height: 100vh; overflow: hidden; background: #f0f2f5; }
+        #sidebar { width: 260px; background: #212529; color: white; padding: 20px; overflow-y: auto; flex-shrink: 0; }
+        #canvas-container { flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; }
+        #canvas { width: 100%; max-width: 1000px; background: white; min-height: 100%; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        #inspector { width: 300px; background: white; border-left: 1px solid #dee2e6; padding: 20px; display: none; flex-shrink: 0; overflow-y: auto; max-height: 100vh; }
+
+        .section-wrapper { position: relative; cursor: pointer; border: 2px solid transparent; margin-bottom: 15px;}
+        .section-wrapper:hover { border: 2px solid #0d6efd; }
+        .section-wrapper.active { border: 2px solid #0d6efd; z-index: 10; background: rgba(13, 110, 253, 0.02); }
+
+        /* Highlight for selected element within a section */
+        .selected-element-highlight { outline: 2px solid #ffc107; }
+
+        .inspector-label { font-size: 0.75rem; font-weight: bold; color: #6c757d; text-transform: uppercase; margin-top: 15px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h5 class="mb-3">📄 Pages</h5>
+        <div id="pagesList" class="mb-3" style="max-height: 150px; overflow-y: auto; background: rgba(255,255,255,0.05); padding: 8px; border-radius: 4px;">
+            <!-- Pages will be listed here -->
+        </div>
+        <div class="d-grid gap-2 mb-3">
+            <button class="btn btn-success btn-sm" onclick="createNewPage()">+ New Page</button>
+            <button class="btn btn-danger btn-sm" id="deletePageBtn" onclick="deletePage(currentPageId)">🗑️ Delete Page</button>
+        </div>
+        <hr>
+        <h5 class="mb-4">Components</h5>
+        <div class="d-grid gap-2">
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('generic')">+ Generic Section</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('hero')">+ Hero Section</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('cards')">+ Feature Cards</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('dashboard')">+ Dashboard</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('gallery')">+ Image Gallery</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('testimonials')">+ Testimonials</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('stats')">+ Stats Section</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('cta')">+ Call to Action</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('form')">+ Form</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('pricing')">+ Pricing Table</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('footer')">+ Footer</button>
+        </div>
+        <hr>
+        <button class="btn btn-primary w-100 mb-2" onclick="showExportModal()">Export HTML</button>
+        <button class="btn btn-secondary w-100" onclick="clearAll()">Clear All Canvas</button>
+    </div>
+
+    <div id="canvas-container">
+        <div id="canvas" onclick="deselect(event)"></div>
+    </div>
+
+   <div id="inspector">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0">Section Settings</h6>
+        <button class="btn-close btn-sm" onclick="closeInspector()"></button>
+    </div>
+
+    <label class="inspector-label">Background Color</label>
+    <input type="color" class="form-control form-control-color w-100" id="bgColor" oninput="updateStyle('backgroundColor', this.value)">
+
+    <label class="inspector-label">Text Color</label>
+    <input type="color" class="form-control form-control-color w-100" id="textColor" oninput="updateStyle('color', this.value)">
+
+    <label class="inspector-label">Vertical Padding</label>
+    <input type="range" class="form-range" min="0" max="5" step="1" id="paddingRange" oninput="updatePadding(this.value)">
+
+    <div id="heroSettingsContainer" style="display: none;">
+        <label class="inspector-label">Hero Background Image URL</label>
+        <input type="text" class="form-control form-control-sm" id="heroBackgroundUrl" placeholder="https://example.com/image.jpg" oninput="updateHeroBackgroundImage(this.value)">
+    </div>
+
+    <div id="formSettingsContainer" style="display: none;">
+        <label class="inspector-label">Form Settings</label>
+        <div class="mb-2">
+            <label for="formMethod" class="form-label small">Method</label>
+            <select class="form-control form-control-sm" id="formMethod" onchange="updateFormAttribute('method', this.value)">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+            </select>
+        </div>
+        <div class="mb-2">
+            <label for="formAction" class="form-label small">Action URL</label>
+            <input type="text" class="form-control form-control-sm" id="formAction" placeholder="/submit" oninput="updateFormAttribute('action', this.value)">
+        </div>
+        <div class="mb-2">
+            <label for="formEnctype" class="form-label small">Encoding Type</label>
+            <select class="form-control form-control-sm" id="formEnctype" onchange="updateFormAttribute('enctype', this.value)">
+                <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                <option value="multipart/form-data">multipart/form-data</option>
+                <option value="text/plain">text/plain</option>
+            </select>
+        </div>
+    </div>
+
+    <label class="inspector-label">Section Actions</label>
+    <div class="d-grid gap-2 mb-3">
+        <button class="btn btn-info btn-sm w-100" onclick="moveSection('up')">↑ Move Up</button>
+        <button class="btn btn-info btn-sm w-100" onclick="moveSection('down')">↓ Move Down</button>
+        <button class="btn btn-warning btn-sm w-100" onclick="duplicateSection()">⚡ Duplicate</button>
+        <button class="btn btn-danger btn-sm w-100" onclick="deleteActiveSection()">Delete Section</button>
+    </div>
+
+    <label class="inspector-label">Add Elements</label>
+    <div class="d-grid gap-2 mb-4">
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('heading')">+ Heading</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('paragraph')">+ Paragraph</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('image')">+ Image</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('button')">+ Button</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('link')">+ Link</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="cardButton" style="display: none;" onclick="addElement('card')">+ Card</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="galleryItemButton" style="display: none;" onclick="addElement('gallery-item')">+ Gallery Item</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="pricingCardButton" style="display: none;" onclick="addPricingCard()">+ Pricing Card</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="testimonialCardButton" style="display: none;" onclick="addTestimonialCard()">+ Testimonial Card</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" id="statItemButton" style="display: none;" onclick="addStatItem()">+ Stat Item</button>
+    </div>
+
+    <div id="form-element-creator" style="display: none;">
+        <label class="inspector-label">Add Form Elements</label>
+        <div class="d-grid gap-2 mb-4">
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('text')">+ Text Input</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('email')">+ Email Input</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('password')">+ Password Input</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('checkbox')">+ Checkbox</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('radio')">+ Radio Button</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('textarea')">+ Textarea</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('select')">+ Select Dropdown</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('submit')">+ Submit Button</button>
+            <button class="btn btn-sm btn-outline-secondary w-100" onclick="addFormElement('label')">+ Label</button>
+        </div>
+    </div>
+
+    <div id="element-inspector" style="display: none;">
+        <label class="inspector-label">Selected Element Properties</label>
+        <div class="mb-2">
+            <label for="elementId" class="form-label small">ID</label>
+            <input type="text" class="form-control form-control-sm" id="elementId" oninput="updateElementAttribute('id', this.value)">
+        </div>
+        <div class="mb-2">
+            <label for="elementClass" class="form-label small">Class</label>
+            <input type="text" class="form-control form-control-sm" id="elementClass" oninput="updateElementAttribute('className', this.value)">
+        </div>
+        <div class="mb-2" id="elementSrcContainer">
+            <label for="elementSrc" class="form-label small">Image URL (src)</label>
+            <input type="text" class="form-control form-control-sm" id="elementSrc" oninput="updateElementAttribute('src', this.value)">
+        </div>
+        <div class="mb-2" id="elementHrefContainer">
+            <label for="elementHref" class="form-label small">Link URL (href)</label>
+            <input type="text" class="form-control form-control-sm" id="elementHref" oninput="updateElementAttribute('href', this.value)">
+        </div>
+        <div class="mb-2" id="elementTextContentContainer">
+            <label for="elementTextContent" class="form-label small">Text Content</label>
+            <textarea class="form-control form-control-sm" id="elementTextContent" oninput="updateElementText(this.value)"></textarea>
+        </div>
+        <div class="mb-2" id="elementFontSizeContainer">
+            <label for="elementFontSize" class="form-label small">Font Size</label>
+            <input type="number" class="form-control form-control-sm" id="elementFontSize" placeholder="px" oninput="updateElementStyle('fontSize', this.value + 'px')">
+        </div>
+        <div class="mb-2" id="elementTextAlignContainer">
+            <label class="form-label small">Text Align</label>
+            <div class="btn-group w-100" role="group">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="updateElementStyle('textAlign', 'left')">L</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="updateElementStyle('textAlign', 'center')">C</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="updateElementStyle('textAlign', 'right')">R</button>
+            </div>
+        </div>
+        <div class="mb-2" id="elementBgColorContainer" style="display: none;">
+            <label class="form-label small">Background Color</label>
+            <input type="color" class="form-control form-control-color w-100" id="elementBgColor" oninput="updateSelectedElementStyle('backgroundColor', this.value)">
+        </div>
+        <div class="mb-2" id="elementTextColorContainer" style="display: none;">
+            <label class="form-label small">Text Color</label>
+            <input type="color" class="form-control form-control-color w-100" id="elementTextColor" oninput="updateSelectedElementStyle('color', this.value)">
+        </div>
+        <div class="mb-2" id="elementBgImageContainer" style="display: none;">
+            <label class="form-label small">Background Image URL</label>
+            <input type="text" class="form-control form-control-sm" id="elementBgImage" placeholder="https://example.com/image.jpg" oninput="updateSelectedElementStyle('backgroundImage', 'url(' + this.value + ')')">
+        </div>
+        <label class="inspector-label">Move Element</label>
+        <div class="d-grid gap-2 mb-3">
+            <div class="btn-group" role="group">
+                <button class="btn btn-info btn-sm" onclick="moveSelectedElement('left')">← Left</button>
+                <button class="btn btn-info btn-sm" onclick="moveSelectedElement('right')">Right →</button>
+            </div>
+            <div class="btn-group" role="group">
+                <button class="btn btn-info btn-sm" onclick="moveSelectedElement('up')">↑ Up</button>
+                <button class="btn btn-info btn-sm" onclick="moveSelectedElement('down')">↓ Down</button>
+            </div>
+        </div>
+        <button class="btn btn-danger btn-sm w-100 mt-2" onclick="deleteSelectedElement()">Delete Element</button>
+        <button class="btn btn-success btn-sm w-100 mt-2" id="duplicateElementBtn" style="display: none;" onclick="duplicateSelectedElement()">⚡ Duplicate</button>
+        <button class="btn btn-secondary btn-sm w-100 mt-2" id="selectParentCardBtn" style="display: none;" onclick="selectParentCard()">← Select Parent Card</button>
+    </div>
+
+    <div id="form-settings-properties" style="display: none;">
+        <label class="inspector-label">Form Settings</label>
+        <div class="mb-2">
+            <label for="sectionFormMethod" class="form-label small">Method</label>
+            <select class="form-control form-control-sm" id="sectionFormMethod" onchange="updateFormAttribute('method', this.value)">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+            </select>
+        </div>
+        <div class="mb-2">
+            <label for="sectionFormAction" class="form-label small">Action URL</label>
+            <input type="text" class="form-control form-control-sm" id="sectionFormAction" placeholder="/submit" oninput="updateFormAttribute('action', this.value)">
+        </div>
+        <div class="mb-2">
+            <label for="sectionFormEnctype" class="form-label small">Encoding Type</label>
+            <select class="form-control form-control-sm" id="sectionFormEnctype" onchange="updateFormAttribute('enctype', this.value)">
+                <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                <option value="multipart/form-data">multipart/form-data</option>
+                <option value="text/plain">text/plain</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="form-element-properties" style="display: none;">
+        <label class="inspector-label">Form Element Properties</label>
+        <div class="mb-2">
+            <label for="formElementName" class="form-label small">Name</label>
+            <input type="text" class="form-control form-control-sm" id="formElementName" oninput="updateElementAttribute('name', this.value)">
+        </div>
+        <div class="mb-2" id="formElementPlaceholderContainer">
+            <label for="formElementPlaceholder" class="form-label small">Placeholder</label>
+            <input type="text" class="form-control form-control-sm" id="formElementPlaceholder" oninput="updateElementAttribute('placeholder', this.value)">
+        </div>
+        <div class="mb-2" id="formElementValueContainer">
+            <label for="formElementValue" class="form-label small">Value</label>
+            <input type="text" class="form-control form-control-sm" id="formElementValue" oninput="updateElementAttribute('value', this.value)">
+        </div>
+        <div class="mb-2" id="formElementForContainer">
+            <label for="formElementFor" class="form-label small">Label For (ID)</label>
+            <input type="text" class="form-control form-control-sm" id="formElementFor" oninput="updateElementAttribute('for', this.value)">
+        </div>
+        <div class="mb-2" id="formElementTypeContainer">
+            <label for="formElementType" class="form-label small">Input Type</label>
+            <select class="form-control form-control-sm" id="formElementType" onchange="updateElementAttribute('type', this.value)">
+                <option value="text">text</option>
+                <option value="email">email</option>
+                <option value="password">password</option>
+                <option value="number">number</option>
+                <option value="date">date</option>
+            </select>
+        </div>
+        <div class="mb-2" id="formElementCheckedContainer">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="formElementChecked" onchange="updateElementAttribute('checked', this.checked)">
+                <label class="form-check-label" for="formElementChecked">Checked</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Pages</h5>
+                <button type="button" class="btn-close" onclick="closeExportModal()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Select Export Option:</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="exportOption" id="exportCurrent" value="current" checked>
+                        <label class="form-check-label" for="exportCurrent">
+                            Current Page Only
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="exportOption" id="exportSelected" value="selected">
+                        <label class="form-check-label" for="exportSelected">
+                            Selected Pages
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="exportOption" id="exportAll" value="all">
+                        <label class="form-check-label" for="exportAll">
+                            All Pages
+                        </label>
+                    </div>
+                </div>
+                <div id="selectedPagesContainer" style="display: none; max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; padding: 10px; border-radius: 4px;">
+                    <!-- Page checkboxes will be added here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeExportModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="exportPages()">Export</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const inspector = document.getElementById('inspector');
+    let activeWrapper = null;
+    let selectedElement = null;
+
+    // Cached DOM references for performance
+    const elementInspectorDiv = document.getElementById('element-inspector');
+    const formElementPropertiesDiv = document.getElementById('form-element-properties');
+    const formElementCreator = document.getElementById('form-element-creator');
+    const cardButton = document.getElementById('cardButton');
+    const galleryItemButton = document.getElementById('galleryItemButton');
+    const pricingCardButton = document.getElementById('pricingCardButton');
+    const testimonialCardButton = document.getElementById('testimonialCardButton');
+    const statItemButton = document.getElementById('statItemButton');
+
+    // Pages management
+    let currentPageId = null;
+    let pages = {};
+    let pageCounter = 0;
+
+    // Ensure Bootstrap modal is loaded
+    if (typeof bootstrap === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
+        document.head.appendChild(script);
+    }
+    
+    const templates = {
+        generic: `<section class="py-3 text-center bg-light" style="color: #000000;">
+            <div class="container">
+                <h2 contenteditable="true">Generic Section Title</h2>
+                <p contenteditable="true">This is a generic section. Click to edit content.</p>
+            </div>
+        </section>`,
+        hero: `<section class="py-5 text-center" style="background-color: #343a40; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://picsum.photos/id/1015/1200/800'); background-size: cover; background-position: center;">
+            <div class="container py-5">
+                <h1 class="display-4 fw-bold" contenteditable="true">Modern Design</h1>
+                <p class="lead" contenteditable="true">Click here to edit text directly over the background image.</p>
+            </div>
+        </section>`,
+        cards: `<section class="py-5 bg-light">
+            <div class="container">
+                <div class="row g-4 justify-content-center">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 contenteditable="true">Feature</h5>
+                                <p contenteditable="true">Description.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 contenteditable="true">Feature</h5>
+                                <p contenteditable="true">Description.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 contenteditable="true">Feature</h5>
+                                <p contenteditable="true">Description.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        gallery: `<section class="py-5" style="background-color: #ffffff;">
+            <div class="container">
+                <div class="row g-3 justify-content-center gallery-row">
+                    <div class="col-12 col-md-6 gallery-item">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-5">
+                                <img src="https://picsum.photos/id/1015/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectElement(this, event)">
+                            </div>
+                            <div class="col-md-7">
+                                <h5 contenteditable="true">Gallery Image</h5>
+                                <p contenteditable="true" class="text-muted mb-0">Beautiful photo with description. Text sits beside image on desktop, stacks below on mobile (responsive grid).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 gallery-item">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-5">
+                                <img src="https://picsum.photos/id/1016/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectElement(this, event)">
+                            </div>
+                            <div class="col-md-7">
+                                <h5 contenteditable="true">Another Gallery Image</h5>
+                                <p contenteditable="true" class="text-muted mb-0">Another beautiful photo with description.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        cta: `<section class="py-5 bg-primary text-white text-center">
+            <div class="container">
+                <h2 contenteditable="true">Ready to get started?</h2>
+                <p class="lead" contenteditable="true">Join us today and experience the difference.</p>
+                <button class="btn btn-light mt-3">Sign Up Now</button>
+            </div>
+        </section>`,
+        testimonials: `<section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-5" contenteditable="true">What Our Clients Say</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="card-text" contenteditable="true">"This product has been a game changer for our business. Highly recommended!"</p>
+                                <footer class="blockquote-footer" contenteditable="true">Client Name</footer>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="card-text" contenteditable="true">"Exceptional service and support. Very professional team."</p>
+                                <footer class="blockquote-footer" contenteditable="true">Client Name</footer>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <p class="card-text" contenteditable="true">"Best investment we made this year. Great ROI!"</p>
+                                <footer class="blockquote-footer" contenteditable="true">Client Name</footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        stats: `<section class="py-5 bg-primary text-white">
+            <div class="container">
+                <div class="row text-center g-4">
+                    <div class="col-md-3">
+                        <h3 class="display-6" contenteditable="true">100+</h3>
+                        <p contenteditable="true">Happy Clients</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="display-6" contenteditable="true">500+</h3>
+                        <p contenteditable="true">Projects Done</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="display-6" contenteditable="true">10+</h3>
+                        <p contenteditable="true">Years Experience</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="display-6" contenteditable="true">24/7</h3>
+                        <p contenteditable="true">Support</p>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        pricing: `<section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-5" contenteditable="true">Our Pricing Plans</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 contenteditable="true">Basic</h5>
+                                <h3 contenteditable="true">$29</h3>
+                                <p contenteditable="true">per month</p>
+                                <ul class="list-unstyled" style="text-align: left;">
+                                    <li contenteditable="true">✓ Feature 1</li>
+                                    <li contenteditable="true">✓ Feature 2</li>
+                                    <li contenteditable="true">✓ Feature 3</li>
+                                </ul>
+                                <button class="btn btn-primary w-100 mt-3">Get Started</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 contenteditable="true">Professional</h5>
+                                <h3 contenteditable="true">$79</h3>
+                                <p contenteditable="true">per month</p>
+                                <ul class="list-unstyled" style="text-align: left;">
+                                    <li contenteditable="true">✓ Feature 1</li>
+                                    <li contenteditable="true">✓ Feature 2</li>
+                                    <li contenteditable="true">✓ Feature 3</li>
+                                </ul>
+                                <button class="btn btn-primary w-100 mt-3">Get Started</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 contenteditable="true">Enterprise</h5>
+                                <h3 contenteditable="true">$199</h3>
+                                <p contenteditable="true">per month</p>
+                                <ul class="list-unstyled" style="text-align: left;">
+                                    <li contenteditable="true">✓ Feature 1</li>
+                                    <li contenteditable="true">✓ Feature 2</li>
+                                    <li contenteditable="true">✓ Feature 3</li>
+                                </ul>
+                                <button class="btn btn-primary w-100 mt-3">Get Started</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        dashboard: `<section class="py-5" style="background-color: #f5f7fa;">
+            <div class="container-fluid px-4">
+                <h2 class="mb-4" contenteditable="true">Dashboard</h2>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted text-uppercase small" contenteditable="true">Total Users</h6>
+                                <h3 class="mt-3 mb-0" contenteditable="true">12,543</h3>
+                                <small class="text-success" contenteditable="true">↑ 12% from last month</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted text-uppercase small" contenteditable="true">Revenue</h6>
+                                <h3 class="mt-3 mb-0" contenteditable="true">$45,231</h3>
+                                <small class="text-success" contenteditable="true">↑ 8% from last month</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted text-uppercase small" contenteditable="true">Conversion Rate</h6>
+                                <h3 class="mt-3 mb-0" contenteditable="true">3.24%</h3>
+                                <small class="text-danger" contenteditable="true">↓ 2% from last month</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h6 class="text-muted text-uppercase small" contenteditable="true">Active Sessions</h6>
+                                <h3 class="mt-3 mb-0" contenteditable="true">892</h3>
+                                <small class="text-success" contenteditable="true">↑ 24% from last month</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4 mb-4">
+                    <div class="col-md-8">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom">
+                                <h6 class="mb-0" contenteditable="true">Monthly Sales</h6>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted small" contenteditable="true">[Chart placeholder - Add your chart here]</p>
+                                <div style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; opacity: 0.3;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom">
+                                <h6 class="mb-0" contenteditable="true">Top Products</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small contenteditable="true">Product A</small>
+                                        <small contenteditable="true">45%</small>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar" style="width: 45%"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small contenteditable="true">Product B</small>
+                                        <small contenteditable="true">30%</small>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-success" style="width: 30%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small contenteditable="true">Product C</small>
+                                        <small contenteditable="true">25%</small>
+                                    </div>
+                                    <div class="progress" style="height: 6px;">
+                                        <div class="progress-bar bg-warning" style="width: 25%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white border-bottom">
+                                <h6 class="mb-0" contenteditable="true">Recent Transactions</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 30%;" contenteditable="true">Customer</th>
+                                                <th style="width: 30%;" contenteditable="true">Product</th>
+                                                <th style="width: 20%;" contenteditable="true">Amount</th>
+                                                <th style="width: 20%;" contenteditable="true">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td contenteditable="true">John Smith</td>
+                                                <td contenteditable="true">Pro Plan</td>
+                                                <td contenteditable="true">$99.00</td>
+                                                <td><span class="badge bg-success">Completed</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td contenteditable="true">Jane Doe</td>
+                                                <td contenteditable="true">Basic Plan</td>
+                                                <td contenteditable="true">$29.00</td>
+                                                <td><span class="badge bg-info">Pending</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td contenteditable="true">Mike Johnson</td>
+                                                <td contenteditable="true">Enterprise</td>
+                                                <td contenteditable="true">$299.00</td>
+                                                <td><span class="badge bg-success">Completed</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        form: `<section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-4" contenteditable="true">Contact Us</h2>
+                <form></form>
+            </div>
+        </section>`,
+        footer: `<footer class="py-4 bg-dark text-white text-center">
+            <div class="container">
+                <p class="mb-0 small" contenteditable="true">© 2026 Your Company. All rights reserved.</p>
+            </div>
+        </footer>`
+    };
+
+    // --- Persistence Functions (Simplified) ---
+    function saveState() {
+        if (currentPageId) {
+            pages[currentPageId].content = canvas.innerHTML;
+            localStorage.setItem('pageBuilderPages', JSON.stringify(pages));
+        }
+    }
+
+    function attachClickHandlers(wrapper) {
+        wrapper.onclick = (e) => handleWrapperClick(e, wrapper);
+        wrapper.querySelectorAll('[contenteditable]').forEach(el => {
+            el.onblur = saveState;
+        });
+        wrapper.querySelectorAll('*').forEach(el => {
+            if (!el.classList.contains('section-wrapper') && el.tagName !== 'SECTION' && el.tagName !== 'DIV' && el !== wrapper && el.parentElement !== wrapper) {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+    }
+
+    function loadLocalState() {
+        const savedPages = localStorage.getItem('pageBuilderPages');
+        if (savedPages) {
+            pages = JSON.parse(savedPages);
+            const pageIds = Object.keys(pages);
+            if (pageIds.length > 0) {
+                currentPageId = pageIds[0];
+                loadPage(currentPageId);
+            }
+        } else {
+            // Create first page if none exist
+            createNewPage();
+        }
+        refreshPagesList();
+    }
+    
+    function loadPage(pageId) {
+        if (pages[pageId]) {
+            currentPageId = pageId;
+            canvas.innerHTML = pages[pageId].content || '';
+            canvas.querySelectorAll('.section-wrapper').forEach(attachClickHandlers);
+            closeInspector();
+            refreshPagesList();
+        }
+    }
+    
+    function createNewPage() {
+        let pageName = prompt('Enter page name:', 'Page ' + (Object.keys(pages).length + 1));
+        if (!pageName || !pageName.trim()) {
+            pageName = 'Page ' + (Object.keys(pages).length + 1);
+        }
+        pageCounter++;
+        const pageId = 'page-' + pageCounter;
+        pages[pageId] = { name: pageName.trim(), content: '' };
+        currentPageId = pageId;
+        canvas.innerHTML = '';
+        closeInspector();
+        saveState();
+        refreshPagesList();
+    }
+    
+    function renamePage(pageId) {
+        const newName = prompt('Enter new page name:', pages[pageId].name);
+        if (newName && newName.trim()) {
+            pages[pageId].name = newName.trim();
+            saveState();
+            refreshPagesList();
+        }
+    }
+    
+    function deletePage(pageId) {
+        if (Object.keys(pages).length === 1) {
+            alert('You must have at least one page!');
+            return;
+        }
+        if (confirm('Are you sure you want to delete this page?')) {
+            delete pages[pageId];
+            const pageIds = Object.keys(pages);
+            currentPageId = pageIds[0];
+            loadPage(currentPageId);
+            saveState();
+        }
+    }
+    
+    function refreshPagesList() {
+        const pagesList = document.getElementById('pagesList');
+        pagesList.innerHTML = '';
+        Object.keys(pages).forEach(pageId => {
+            const page = pages[pageId];
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-sm w-100 mb-2 ' + (currentPageId === pageId ? 'btn-primary' : 'btn-outline-light');
+            btn.textContent = page.name;
+            btn.style.textAlign = 'left';
+            btn.ondblclick = () => renamePage(pageId);
+            btn.onclick = () => loadPage(pageId);
+            pagesList.appendChild(btn);
+        });
+    }
+    
+    window.onload = loadLocalState;
+    // --- END Persistence Functions ---
+
+    // Centralized click handler for section wrappers to distinguish between section and element clicks
+    function handleWrapperClick(e, wrapper) {
+        e.stopPropagation(); // Prevent deselect from being called on canvas click
+        // If a child element was clicked, try to select it, otherwise select the section
+        if (e.target !== wrapper && e.target.closest('.section-wrapper') === wrapper && e.target.tagName !== 'SECTION') {
+            // If the clicked element is not the wrapper itself, and it's inside, select it
+            selectElement(e.target);
+        } else {
+            selectSection(wrapper);
+        }
+    }
+
+    function addSection(type) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'section-wrapper';
+        wrapper.dataset.type = type;
+        wrapper.innerHTML = `\n            ${templates[type]}`;
+
+        canvas.appendChild(wrapper);
+        attachClickHandlers(wrapper);
+        saveState();
+        selectSection(wrapper);
+    }
+
+    function selectSection(wrapper) {
+        if (activeWrapper) activeWrapper.classList.remove('active');
+        if (selectedElement) {
+            selectedElement.classList.remove('selected-element-highlight');
+            selectedElement = null;
+        }
+
+        activeWrapper = wrapper;
+        activeWrapper.classList.add('active');
+        inspector.style.display = 'block';
+        elementInspectorDiv.style.display = 'none';
+        formElementPropertiesDiv.style.display = 'none';
+        document.getElementById('form-settings-properties').style.display = 'none';
+        document.getElementById('heroSettingsContainer').style.display = 'none';
+        document.getElementById('formSettingsContainer').style.display = 'none';
+
+        // Show/hide section-specific controls based on type
+        const sectionType = wrapper.dataset.type;
+        formElementCreator.style.display = sectionType === 'form' ? 'block' : 'none';
+        cardButton.style.display = sectionType === 'cards' ? 'block' : 'none';
+        galleryItemButton.style.display = sectionType === 'gallery' ? 'block' : 'none';
+        pricingCardButton.style.display = sectionType === 'pricing' ? 'block' : 'none';
+        testimonialCardButton.style.display = sectionType === 'testimonials' ? 'block' : 'none';
+        statItemButton.style.display = sectionType === 'stats' ? 'block' : 'none';
+        
+        // Show hero background image controls for hero section
+        if (sectionType === 'hero') {
+            document.getElementById('heroSettingsContainer').style.display = 'block';
+            const target = wrapper.querySelector('section');
+            const bgImageMatch = target.style.backgroundImage.match(/url\('([^']+)'\)/);
+            document.getElementById('heroBackgroundUrl').value = bgImageMatch ? bgImageMatch[1] : '';
+        }
+        
+        // Show form settings for form section
+        if (sectionType === 'form') {
+            document.getElementById('formSettingsContainer').style.display = 'block';
+            const form = wrapper.querySelector('form');
+            document.getElementById('formMethod').value = form.getAttribute('method') || 'GET';
+            document.getElementById('formAction').value = form.getAttribute('action') || '';
+            document.getElementById('formEnctype').value = form.getAttribute('enctype') || 'application/x-www-form-urlencoded';
+        }
+
+        const target = wrapper.querySelector('section, footer');
+        const styles = window.getComputedStyle(target);
+        document.getElementById('bgColor').value = rgbToHex(styles.backgroundColor);
+        document.getElementById('textColor').value = rgbToHex(styles.color);
+        const currentPadding = target.className.match(/py-(\d)/);
+        document.getElementById('paddingRange').value = currentPadding ? currentPadding[1] : 3;
+    }
+
+    function selectElement(element) {
+        // Don't select the wrapper or section itself as an element
+        if (element.classList.contains('section-wrapper') || element.tagName === 'SECTION' || element.tagName === 'BODY' || element.tagName === 'HTML' || element === canvas || element === document.getElementById('canvas-container')) {
+            return;
+        }
+
+        // Ensure the element is within an activeWrapper before selecting it
+        const closestWrapper = element.closest('.section-wrapper');
+        if (!closestWrapper || closestWrapper !== activeWrapper) {
+            selectSection(closestWrapper || null); // Select the parent section if not already active
+            if (!closestWrapper) return; // If no wrapper, nothing to select
+        }
+
+        if (selectedElement) {
+            selectedElement.classList.remove('selected-element-highlight');
+        }
+        selectedElement = element;
+        selectedElement.classList.add('selected-element-highlight');
+        inspector.style.display = 'block';
+        populateElementInspector();
+
+        // If an editable element is clicked, attach a blur listener to save state when editing stops
+        if (element.hasAttribute('contenteditable')) {
+            element.onblur = saveState;
+        }
+    }
+
+    function selectParentCard() {
+        if (selectedElement) {
+            const parentCard = selectedElement.closest('.card');
+            if (parentCard) {
+                // Select the card wrapper (col-md-4 or col-md-3 div)
+                const cardWrapper = parentCard.closest('[class*="col-"]');
+                if (cardWrapper) {
+                    selectElement(cardWrapper);
+                }
+            }
+        }
+    }
+
+    function populateElementInspector() {
+        const elementInspectorDiv = document.getElementById('element-inspector');
+        const formElementPropertiesDiv = document.getElementById('form-element-properties');
+        const formSettingsPropertiesDiv = document.getElementById('form-settings-properties');
+        const selectParentCardBtn = document.getElementById('selectParentCardBtn');
+        const duplicateElementBtn = document.getElementById('duplicateElementBtn');
+        const bgColorContainer = document.getElementById('elementBgColorContainer');
+        const textColorContainer = document.getElementById('elementTextColorContainer');
+        const bgImageContainer = document.getElementById('elementBgImageContainer');
+        
+        if (!selectedElement) {
+            elementInspectorDiv.style.display = 'none';
+            formElementPropertiesDiv.style.display = 'none';
+            formSettingsPropertiesDiv.style.display = 'none';
+            selectParentCardBtn.style.display = 'none';
+            duplicateElementBtn.style.display = 'none';
+            bgColorContainer.style.display = 'none';
+            textColorContainer.style.display = 'none';
+            bgImageContainer.style.display = 'none';
+            return;
+        }
+
+        // Check if selectedElement is inside a card
+        const parentCard = selectedElement.closest('.card');
+        selectParentCardBtn.style.display = parentCard ? 'block' : 'none';
+        
+        // Show duplicate button for all elements that can be duplicated
+        duplicateElementBtn.style.display = 'block';
+
+        // Hide section form settings and form element property fields initially
+        formSettingsPropertiesDiv.style.display = 'none';
+        formElementPropertiesDiv.style.display = 'none';
+        hideFormFieldContainers();
+
+        // Show/hide styling controls based on element type
+        const isBlockElement = ['DIV', 'SECTION', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'BUTTON', 'A', 'LABEL'].includes(selectedElement.tagName);
+        const isTextElement = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'SPAN', 'DIV', 'LABEL', 'BUTTON'].includes(selectedElement.tagName);
+        
+        // Show background color for block elements (except images)
+        bgColorContainer.style.display = (isBlockElement && selectedElement.tagName !== 'IMG') ? 'block' : 'none';
+        if (bgColorContainer.style.display === 'block') {
+            document.getElementById('elementBgColor').value = rgbToHex(window.getComputedStyle(selectedElement).backgroundColor);
+        }
+        
+        // Show text color for text elements
+        textColorContainer.style.display = isTextElement ? 'block' : 'none';
+        if (textColorContainer.style.display === 'block') {
+            document.getElementById('elementTextColor').value = rgbToHex(window.getComputedStyle(selectedElement).color);
+        }
+        
+        // Show background image for most elements except images
+        bgImageContainer.style.display = (selectedElement.tagName !== 'IMG') ? 'block' : 'none';
+        if (bgImageContainer.style.display === 'block') {
+            const bgImage = window.getComputedStyle(selectedElement).backgroundImage;
+            const urlMatch = bgImage.match(/url\((['"]?)(.+?)\1\)/);
+            document.getElementById('elementBgImage').value = urlMatch ? urlMatch[2] : '';
+        }
+
+        // Hide/show text formatting controls
+        const fontSizeContainer = document.getElementById('elementFontSizeContainer');
+        const textAlignContainer = document.getElementById('elementTextAlignContainer');
+        const isTextElement2 = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'SPAN', 'DIV', 'LABEL', 'BUTTON'].includes(selectedElement.tagName);
+        
+        fontSizeContainer.style.display = isTextElement ? 'block' : 'none';
+        textAlignContainer.style.display = isTextElement ? 'block' : 'none';
+        
+        if (isTextElement) {
+            const computedStyle = window.getComputedStyle(selectedElement);
+            const fontSize = computedStyle.fontSize.replace('px', '');
+            document.getElementById('elementFontSize').value = fontSize;
+        }
+
+        // General element properties
+        document.getElementById('elementId').value = selectedElement.id;
+        document.getElementById('elementClass').value = selectedElement.className;
+
+        const srcContainer = document.getElementById('elementSrcContainer');
+        const hrefContainer = document.getElementById('elementHrefContainer');
+        const textContentContainer = document.getElementById('elementTextContentContainer');
+
+        // Reset visibility
+        srcContainer.style.display = 'none';
+        hrefContainer.style.display = 'none';
+        textContentContainer.style.display = 'none';
+
+        if (selectedElement.tagName === 'IMG') {
+            srcContainer.style.display = 'block';
+            document.getElementById('elementSrc').value = selectedElement.src;
+        } else if (selectedElement.tagName === 'A') {
+            hrefContainer.style.display = 'block';
+            document.getElementById('elementHref').value = selectedElement.href;
+            textContentContainer.style.display = 'block';
+            document.getElementById('elementTextContent').value = selectedElement.textContent;
+        } else if (selectedElement.hasAttribute('contenteditable')) {
+            textContentContainer.style.display = 'block';
+            document.getElementById('elementTextContent').value = selectedElement.innerHTML; // Use innerHTML for rich contenteditable
+        }
+
+        // Make sure textContent is always editable if the element itself is editable
+        if (selectedElement.hasAttribute('contenteditable')) {
+            textContentContainer.style.display = 'block';
+            document.getElementById('elementTextContent').value = selectedElement.innerHTML;
+        } else if (!srcContainer.style.display === 'block' && !hrefContainer.style.display === 'block') {
+            // If it's not an image or link, but has text, allow editing
+            if (selectedElement.children.length === 0 && selectedElement.textContent.trim().length > 0) {
+                 textContentContainer.style.display = 'block';
+                 document.getElementById('elementTextContent').value = selectedElement.textContent;
+            }
+        }
+
+        // Form element specific properties - ONLY for form elements inside forms, not design buttons
+        const isInForm = selectedElement.closest('form') !== null;
+        if ((selectedElement.tagName === 'INPUT' || selectedElement.tagName === 'TEXTAREA' || selectedElement.tagName === 'SELECT' || selectedElement.tagName === 'LABEL') && isInForm) {
+            formElementPropertiesDiv.style.display = 'block';
+            document.getElementById('formElementName').parentElement.style.display = 'block';
+            document.getElementById('formElementName').value = selectedElement.name || '';
+
+            if (selectedElement.tagName === 'INPUT') {
+                document.getElementById('formElementTypeContainer').style.display = 'block';
+                document.getElementById('formElementType').value = selectedElement.type || 'text';
+
+                if (selectedElement.type === 'text' || selectedElement.type === 'email' || selectedElement.type === 'password' || selectedElement.type === 'number') {
+                    document.getElementById('formElementPlaceholderContainer').style.display = 'block';
+                    document.getElementById('formElementPlaceholder').value = selectedElement.placeholder || '';
+                    document.getElementById('formElementValueContainer').style.display = 'block';
+                    document.getElementById('formElementValue').value = selectedElement.value || '';
+                } else if (selectedElement.type === 'checkbox' || selectedElement.type === 'radio') {
+                    document.getElementById('formElementValueContainer').style.display = 'block';
+                    document.getElementById('formElementValue').value = selectedElement.value || '';
+                    document.getElementById('formElementCheckedContainer').style.display = 'block';
+                    document.getElementById('formElementChecked').checked = selectedElement.checked;
+                }
+            } else if (selectedElement.tagName === 'TEXTAREA') {
+                document.getElementById('formElementPlaceholderContainer').style.display = 'block';
+                document.getElementById('formElementPlaceholder').value = selectedElement.placeholder || '';
+            } else if (selectedElement.tagName === 'LABEL') {
+                document.getElementById('formElementForContainer').style.display = 'block';
+                document.getElementById('formElementFor').value = selectedElement.htmlFor || '';
+            }
+
+            // Also manage text content for editable form elements
+            if (selectedElement.hasAttribute('contenteditable') || selectedElement.tagName === 'BUTTON' || selectedElement.tagName === 'LABEL' || selectedElement.tagName === 'OPTION') {
+                textContentContainer.style.display = 'block';
+                document.getElementById('elementTextContent').value = selectedElement.innerHTML; // Use innerHTML for rich contenteditable and general text
+            }
+        }
+
+        // Ensure general element inspector is hidden if a form element is selected with its specific properties
+        if (formElementPropertiesDiv.style.display === 'block') {
+            elementInspectorDiv.style.display = 'none';
+        } else {
+            elementInspectorDiv.style.display = 'block';
+        }
+    }
+
+    function updateElementAttribute(attributeName, value) {
+        if (selectedElement) {
+            if (attributeName === 'className') {
+                selectedElement.className = value; // Special handling for class
+            } else if (attributeName === 'checked') {
+                selectedElement.checked = value;
+            } else if (attributeName === 'for') {
+                selectedElement.htmlFor = value; // Special handling for 'for' attribute of labels
+            } else {
+                selectedElement.setAttribute(attributeName, value);
+            }
+            saveState();
+        }
+    }
+
+    function updateElementText(value) {
+        if (selectedElement) {
+            if (selectedElement.hasAttribute('contenteditable') || selectedElement.tagName === 'BUTTON' || selectedElement.tagName === 'LABEL' || selectedElement.tagName === 'OPTION') {
+                selectedElement.innerHTML = value;
+            } else if (selectedElement.children.length === 0) { // For non-contenteditable elements with direct text
+                selectedElement.textContent = value;
+            }
+            saveState();
+        }
+    }
+
+    function updateElementStyle(prop, val) {
+        if (selectedElement) {
+            selectedElement.style[prop] = val;
+            saveState();
+        }
+    }
+
+    function updateSelectedElementStyle(prop, val) {
+        if (!selectedElement) return;
+        selectedElement.style[prop] = val;
+        // Update inspector input if it exists
+        if (prop === 'backgroundColor') {
+            document.getElementById('elementBgColor').value = rgbToHex(selectedElement.style.backgroundColor);
+        } else if (prop === 'color') {
+            document.getElementById('elementTextColor').value = rgbToHex(selectedElement.style.color);
+        } else if (prop === 'backgroundImage') {
+            const urlMatch = val.match(/url\((['"]?)(.+?)\1\)/);
+            if (urlMatch) {
+                document.getElementById('elementBgImage').value = urlMatch[2];
+            }
+        }
+        saveState();
+    }
+
+    function moveSelectedElement(direction) {
+        if (!selectedElement || !activeWrapper) return;
+        
+        const parent = selectedElement.parentElement;
+        const siblings = Array.from(parent.children);
+        const currentIndex = siblings.indexOf(selectedElement);
+        
+        if (direction === 'up' && currentIndex > 0) {
+            parent.insertBefore(selectedElement, siblings[currentIndex - 1]);
+            saveState();
+        } else if (direction === 'down' && currentIndex < siblings.length - 1) {
+            parent.insertBefore(selectedElement, siblings[currentIndex + 2]);
+            saveState();
+        } else if (direction === 'left') {
+            // For left movement in grids, swap with previous sibling
+            if (currentIndex > 0) {
+                parent.insertBefore(selectedElement, siblings[currentIndex - 1]);
+                saveState();
+            }
+        } else if (direction === 'right') {
+            // For right movement in grids, swap with next sibling
+            if (currentIndex < siblings.length - 1) {
+                parent.insertBefore(selectedElement, siblings[currentIndex + 2]);
+                saveState();
+            }
+        }
+    }
+
+    function removeBootstrapClasses(el, type) {
+        const classMap = {
+            bg: ['bg-dark', 'bg-light', 'bg-primary', 'bg-secondary', 'bg-white'],
+            text: ['text-white', 'text-dark', 'text-muted', 'text-black']
+        };
+        (classMap[type] || []).forEach(cls => el.classList.remove(cls));
+    }
+
+    function hideFormFieldContainers() {
+        const containerIds = ['formElementName', 'formElementPlaceholderContainer', 'formElementValueContainer', 'formElementForContainer', 'formElementTypeContainer', 'formElementCheckedContainer'];
+        containerIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+            else if (id === 'formElementName') document.getElementById('formElementName').parentElement.style.display = 'none';
+        });
+    }
+
+    function updateStyle(prop, val) {
+        if(!activeWrapper) return;
+        const target = activeWrapper.querySelector('section, footer');
+        if(prop === 'backgroundColor') removeBootstrapClasses(target, 'bg');
+        if(prop === 'color') removeBootstrapClasses(target, 'text');
+        target.style[prop] = val;
+        saveState();
+    }
+
+    function updateHeroBackgroundImage(url) {
+        if(!activeWrapper || activeWrapper.dataset.type !== 'hero') return;
+        const target = activeWrapper.querySelector('section');
+        // Parse existing gradient and replace image URL
+        const gradientMatch = target.style.backgroundImage.match(/(linear-gradient\([^,]+,[^)]+\)),\s*url\([^)]+\)/);
+        if (gradientMatch) {
+            target.style.backgroundImage = `${gradientMatch[1]}, url('${url}')`;
+        } else {
+            target.style.backgroundImage = `url('${url}')`;
+        }
+        saveState();
+    }
+
+    function updateFormAttribute(attributeName, value) {
+        if(!activeWrapper || activeWrapper.dataset.type !== 'form') return;
+        const form = activeWrapper.querySelector('form');
+        if (form) {
+            form.setAttribute(attributeName, value);
+            // Update the input fields to reflect changes
+            if (attributeName === 'method') document.getElementById('sectionFormMethod').value = value;
+            if (attributeName === 'action') document.getElementById('sectionFormAction').value = value;
+            if (attributeName === 'enctype') document.getElementById('sectionFormEnctype').value = value;
+            saveState();
+        }
+    }
+
+    function updatePadding(val) {
+        const el = activeWrapper.querySelector('section, footer');
+        el.className = el.className.replace(/py-\d/, 'py-' + val);
+        saveState();
+    }
+
+    function addElement(type) {
+        if (!activeWrapper) return;
+        
+        let container;
+        
+        // Check if selectedElement is inside a card - if so, add elements to the card's body
+        let cardBody = null;
+        if (selectedElement) {
+            const card = selectedElement.closest('.card');
+            if (card) {
+                cardBody = card.querySelector('.card-body');
+            }
+        }
+        
+        if (cardBody) {
+            // Add element inside the card body if we're inside a card
+            container = cardBody;
+        } else if (type === 'card' && activeWrapper.dataset.type === 'cards') {
+            container = activeWrapper.querySelector('.row');
+        } else if (type === 'gallery-item' && activeWrapper.dataset.type === 'gallery') {
+            container = activeWrapper.querySelector('.gallery-row');
+        } else {
+            container = activeWrapper.querySelector('.container') || activeWrapper.querySelector('section, footer');
+        }
+        if (!container) return;
+
+        let html = '';
+        switch(type) {
+            case 'heading':
+                html = `<h3 contenteditable="true" class="mb-4">New Heading</h3>`;
+                break;
+            case 'paragraph':
+                html = `<p contenteditable="true" class="mb-4">New paragraph text. Click to edit.</p>`;
+                break;
+            case 'image':
+                const id = Math.floor(Math.random() * 200) + 10;
+                html = `<img src="https://picsum.photos/id/${id}/400/250" class="img-fluid rounded shadow-sm my-3" alt="New Image">`;
+                break;
+            case 'button':
+                html = `<button class="btn btn-primary my-3">Call to Action</button>`;
+                break;
+            case 'link':
+                html = `<a href="#" class="d-block my-3">Clickable Link</a>`;
+                break;
+            case 'card':
+                html = `<div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 contenteditable="true">Feature</h5>
+                            <p contenteditable="true">Description.</p>
+                        </div>
+                    </div>
+                </div>`;
+                break;
+            case 'gallery-item':
+                html = `<div class="col-12 col-md-6 gallery-item">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <img src="https://picsum.photos/id/${Math.floor(Math.random() * 200) + 10}/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectElement(this, event)">
+                        </div>
+                        <div class="col-md-7">
+                            <h5 contenteditable="true">Gallery Image</h5>
+                            <p contenteditable="true" class="text-muted mb-0">Beautiful photo with description.</p>
+                        </div>
+                    </div>
+                </div>`;
+                break;
+        }
+
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const newElement = temp.firstElementChild;
+        container.appendChild(newElement);
+
+        // Make newly added elements clickable for selection
+        newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+        if (newElement.hasAttribute('contenteditable')) {
+            newElement.onblur = saveState;
+        }
+
+        saveState();
+        selectElement(newElement); // Select the newly added element
+    }
+
+    function addPricingCard() {
+        if (!activeWrapper || activeWrapper.dataset.type !== 'pricing') return;
+        const container = activeWrapper.querySelector('.row');
+        if (!container) return;
+
+        const html = `<div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 contenteditable="true">Plan Name</h5>
+                    <h3 contenteditable="true">$99</h3>
+                    <p contenteditable="true">per month</p>
+                    <ul class="list-unstyled" style="text-align: left;">
+                        <li contenteditable="true">✓ Feature 1</li>
+                        <li contenteditable="true">✓ Feature 2</li>
+                    </ul>
+                    <button class="btn btn-primary w-100 mt-3">Get Started</button>
+                </div>
+            </div>
+        </div>`;
+
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const newElement = temp.firstElementChild;
+        container.appendChild(newElement);
+
+        // Make newly added card clickable and its elements selectable
+        newElement.querySelectorAll('*').forEach(el => {
+            if (!el.classList.contains('card') && el.tagName !== 'DIV') {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+        newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+
+        saveState();
+        selectElement(newElement);
+    }
+
+    function addTestimonialCard() {
+        if (!activeWrapper || activeWrapper.dataset.type !== 'testimonials') return;
+        const container = activeWrapper.querySelector('.row');
+        if (!container) return;
+
+        const html = `<div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <p class="card-text" contenteditable="true">"Amazing product! Highly recommended."</p>
+                    <footer class="blockquote-footer" contenteditable="true">Client Name</footer>
+                </div>
+            </div>
+        </div>`;
+
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const newElement = temp.firstElementChild;
+        container.appendChild(newElement);
+
+        // Make newly added card clickable and its elements selectable
+        newElement.querySelectorAll('*').forEach(el => {
+            if (!el.classList.contains('card') && el.tagName !== 'DIV') {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+        newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+
+        saveState();
+        selectElement(newElement);
+    }
+
+    function addStatItem() {
+        if (!activeWrapper || activeWrapper.dataset.type !== 'stats') return;
+        const container = activeWrapper.querySelector('.row');
+        if (!container) return;
+
+        const html = `<div class="col-md-3">
+            <h3 class="display-6" contenteditable="true">50+</h3>
+            <p contenteditable="true">Happy Customers</p>
+        </div>`;
+
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const newElement = temp.firstElementChild;
+        container.appendChild(newElement);
+
+        // Make newly added stat clickable and its elements selectable
+        newElement.querySelectorAll('*').forEach(el => {
+            if (el.tagName !== 'DIV') {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+        newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+
+        saveState();
+        selectElement(newElement);
+    }
+
+    function deleteActiveSection() {
+        if (activeWrapper) {
+            activeWrapper.remove();
+            closeInspector();
+            saveState();
+        }
+    }
+
+    function moveSection(direction) {
+        if (!activeWrapper) return;
+        const wrapper = activeWrapper;
+        if (direction === 'up' && wrapper.previousElementSibling) {
+            wrapper.parentNode.insertBefore(wrapper, wrapper.previousElementSibling);
+        } else if (direction === 'down' && wrapper.nextElementSibling) {
+            wrapper.parentNode.insertBefore(wrapper.nextElementSibling, wrapper);
+        }
+        saveState();
+    }
+
+    function duplicateSection() {
+        if (!activeWrapper) return;
+        const clone = activeWrapper.cloneNode(true);
+        activeWrapper.parentNode.insertBefore(clone, activeWrapper.nextSibling);
+        attachClickHandlers(clone);
+        saveState();
+        selectSection(clone);
+    }
+
+    function deleteSelectedElement() {
+        if (selectedElement && activeWrapper && activeWrapper.contains(selectedElement)) {
+            const parent = selectedElement.parentElement;
+            selectedElement.remove();
+            selectedElement = null;
+            // Try to re-select the parent if it's still there
+            if (parent && activeWrapper.contains(parent)) {
+                selectElement(parent); // Select parent of deleted element
+            } else {
+                populateElementInspector(); // Clear inspector
+            }
+            saveState();
+        }
+    }
+
+    function duplicateSelectedElement() {
+        if (!selectedElement || !activeWrapper || !activeWrapper.contains(selectedElement)) return;
+        
+        // Clone the selected element
+        const clone = selectedElement.cloneNode(true);
+        
+        // Remove any ID to avoid duplicates (but keep classes)
+        clone.id = '';
+        
+        // Clear any highlights
+        clone.classList.remove('selected-element-highlight');
+        
+        // Insert the clone after the original element
+        selectedElement.parentNode.insertBefore(clone, selectedElement.nextSibling);
+        
+        // Attach click handlers to the cloned element
+        clone.onclick = (e) => { e.stopPropagation(); selectElement(clone); };
+        
+        // If the clone has contenteditable, attach blur listener
+        if (clone.hasAttribute('contenteditable')) {
+            clone.onblur = saveState;
+        }
+        
+        // Recursively attach handlers to cloned children
+        clone.querySelectorAll('*').forEach(el => {
+            if (el.hasAttribute('contenteditable')) {
+                el.onblur = saveState;
+            }
+            if (!el.classList.contains('section-wrapper') && !el.classList.contains('card') && el.tagName !== 'SECTION' && el.tagName !== 'DIV') {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+        
+        saveState();
+        selectElement(clone);
+    }
+
+    function addFormElement(type) {
+        if (!activeWrapper || activeWrapper.dataset.type !== 'form') return;
+
+        // Find the innermost container within the form section
+        const formContainer = activeWrapper.querySelector('form') || activeWrapper.querySelector('.container') || activeWrapper.querySelector('section, footer');
+        if (!formContainer) return;
+
+        let elementHtml = '';
+        const uniqueId = 'input-' + Date.now(); // Generate a unique ID
+
+        switch(type) {
+            case 'text':
+            case 'email':
+            case 'password':
+                elementHtml = `
+                    <div class="mb-3">
+                        <label for="${uniqueId}" class="form-label" contenteditable="true">${type.charAt(0).toUpperCase() + type.slice(1)}</label>
+                        <input type="${type}" class="form-control" id="${uniqueId}" name="${uniqueId}" placeholder="Enter ${type}">
+                    </div>`;
+                break;
+            case 'textarea':
+                elementHtml = `
+                    <div class="mb-3">
+                        <label for="${uniqueId}" class="form-label" contenteditable="true">Message</label>
+                        <textarea class="form-control" id="${uniqueId}" name="${uniqueId}" rows="3" placeholder="Your message"></textarea>
+                    </div>`;
+                break;
+            case 'select':
+                elementHtml = `
+                    <div class="mb-3">
+                        <label for="${uniqueId}" class="form-label" contenteditable="true">Select Option</label>
+                        <select class="form-select" id="${uniqueId}" name="${uniqueId}">
+                            <option value="option1" contenteditable="true">Option 1</option>
+                            <option value="option2" contenteditable="true">Option 2</option>
+                        </select>
+                    </div>`;
+                break;
+            case 'checkbox':
+                elementHtml = `
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="${uniqueId}" name="${uniqueId}">
+                        <label class="form-check-label" for="${uniqueId}" contenteditable="true">Check me out</label>
+                    </div>`;
+                break;
+            case 'radio':
+                const radioGroupName = 'radio-group-' + Date.now();
+                elementHtml = `
+                    <div class="mb-3">
+                        <label class="form-label" contenteditable="true">Radio Group Title</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="${radioGroupName}" id="${uniqueId}-1" value="option1">
+                            <label class="form-check-label" for="${uniqueId}-1" contenteditable="true">Radio Option 1</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="${radioGroupName}" id="${uniqueId}-2" value="option2">
+                            <label class="form-check-label" for="${uniqueId}-2" contenteditable="true">Radio Option 2</label>
+                        </div>
+                    </div>`;
+                break;
+            case 'submit':
+                elementHtml = `<button type="submit" class="btn btn-primary my-3">Submit</button>`;
+                break;
+            case 'label':
+                 elementHtml = `<label for="" class="form-label my-2" contenteditable="true">New Label</label>`;
+                 break;
+        }
+
+        if (elementHtml) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = elementHtml.trim();
+            const newElement = tempDiv.firstElementChild;
+
+            formContainer.appendChild(newElement);
+
+            // Make newly added elements clickable for selection
+            // If the element is a container (like mb-3 for text input), make its direct children clickable
+            if (newElement.classList.contains('mb-3')) {
+                newElement.querySelectorAll('input, textarea, select, label, button').forEach(el => {
+                    el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+                    if (el.hasAttribute('contenteditable')) el.onblur = saveState;
+                });
+            } else if (newElement.tagName === 'BUTTON') {
+                 // For button elements, explicitly attach click handler
+                 newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+            } else {
+                 newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+                 if (newElement.hasAttribute('contenteditable')) newElement.onblur = saveState;
+            }
+
+            saveState();
+            selectElement(newElement); // Select the newly added element
+        }
+    }
+
+    function closeInspector() {
+        inspector.style.display = 'none';
+        if(activeWrapper) activeWrapper.classList.remove('active');
+        if(selectedElement) selectedElement.classList.remove('selected-element-highlight');
+        activeWrapper = null;
+        selectedElement = null;
+        document.getElementById('element-inspector').style.display = 'none'; // Ensure element inspector is hidden
+    }
+
+    function deselect(e) {
+        // Only deselect everything if click is directly on canvas or canvas-container
+        if(e.target === canvas || e.target === document.getElementById('canvas-container')) {
+            closeInspector();
+            saveState(); // Save state when deselecting everything
+        } else if (e.target.hasAttribute('contenteditable')) {
+            // If an editable element is clicked, attach a blur listener to save state when editing stops
+            e.target.onblur = saveState;
+        }
+    }
+
+    function clearAll() {
+        if (confirm('Clear all content on this page?')) {
+            canvas.innerHTML = '';
+            closeInspector();
+            saveState();
+        }
+    }
+
+    function rgbToHex(rgb) {
+        if (!rgb || rgb === 'transparent' || rgb.includes('rgba(0, 0, 0, 0)')) return '#ffffff';
+        const vals = rgb.match(/\d+/g);
+        return "#" + vals.slice(0,3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+    }
+
+    function showExportModal() {
+        const exportModal = new bootstrap.Modal(document.getElementById('exportModal'));
+        const selectedPagesContainer = document.getElementById('selectedPagesContainer');
+        selectedPagesContainer.innerHTML = '';
+        Object.keys(pages).forEach(pageId => {
+            const page = pages[pageId];
+            const checkbox = document.createElement('div');
+            checkbox.className = 'form-check';
+            checkbox.innerHTML = `
+                <input class="form-check-input" type="checkbox" id="page-${pageId}" value="${pageId}" checked>
+                <label class="form-check-label" for="page-${pageId}">
+                    ${page.name}
+                </label>
+            `;
+            selectedPagesContainer.appendChild(checkbox);
+        });
+        
+        document.querySelectorAll('input[name="exportOption"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                selectedPagesContainer.style.display = this.value === 'selected' ? 'block' : 'none';
+            });
+        });
+        exportModal.show();
+    }
+    
+    function closeExportModal() {
+        const exportModal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
+        if (exportModal) exportModal.hide();
+    }
+    
+    function exportPages() {
+        const exportOption = document.querySelector('input[name="exportOption"]:checked').value;
+        const pagesToExport = {};
+        
+        if (exportOption === 'current') {
+            pagesToExport[currentPageId] = pages[currentPageId];
+        } else if (exportOption === 'selected') {
+            document.querySelectorAll('#selectedPagesContainer input[type="checkbox"]:checked').forEach(checkbox => {
+                const pageId = checkbox.value;
+                pagesToExport[pageId] = pages[pageId];
+            });
+        } else if (exportOption === 'all') {
+            Object.keys(pages).forEach(pageId => {
+                pagesToExport[pageId] = pages[pageId];
+            });
+        }
+        
+        if (Object.keys(pagesToExport).length === 0) {
+            alert('Please select at least one page to export.');
+            return;
+        }
+        
+        if (Object.keys(pagesToExport).length === 1) {
+            // Export single page
+            const pageId = Object.keys(pagesToExport)[0];
+            const page = pagesToExport[pageId];
+            exportSinglePage(page.name, page.content);
+        } else {
+            // Export multiple pages as ZIP
+            exportMultiplePagesAsZip(pagesToExport);
+        }
+        
+        closeExportModal();
+    }
+    
+    function exportSinglePage(pageName, content) {
+        const clone =document.createElement('div');
+        clone.innerHTML = content;
+        let htmlContent = '';
+        clone.querySelectorAll('.section-wrapper').forEach(w => {
+            w.classList.remove('active');
+            w.querySelectorAll('.selected-element-highlight').forEach(el => el.classList.remove('selected-element-highlight'));
+            const section = w.querySelector('section, footer');
+            if(section) {
+                section.removeAttribute('contenteditable');
+                section.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
+                htmlContent += section.outerHTML;
+            }
+        });
+        const blob = new Blob([`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${pageName}</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body>${htmlContent}</body></html>`], {type: 'text/html'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = pageName.toLowerCase().replace(/\s+/g, '-') + '.html';
+        a.click();
+    }
+    
+    function exportMultiplePagesAsZip(pagesToExport) {
+        // Check if JSZip is available
+        if (typeof JSZip === 'undefined') {
+            alert('ZIP library not loaded. Exporting as combined HTML instead.');
+            exportMultiplePages(pagesToExport);
+            return;
+        }
+        
+        const zip = new JSZip();
+        
+        // Create individual HTML files for each page
+        Object.keys(pagesToExport).forEach(pageId => {
+            const page = pagesToExport[pageId];
+            const htmlContent = generateCleanHtml(page.name, page.content);
+            const fileName = page.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '.html';
+            zip.file(fileName, htmlContent);
+        });
+        
+        // Also create an index.html that links to all pages
+        const indexHtml = generateIndexHtml(pagesToExport);
+        zip.file('index.html', indexHtml);
+        
+        // Generate and download the ZIP file
+        zip.generateAsync({type: 'blob'}).then(blob => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'website.zip';
+            a.click();
+        }).catch(err => {
+            alert('Error creating ZIP file: ' + err.message);
+        });
+    }
+    
+    function generateCleanHtml(pageName, content) {
+        const clone = document.createElement('div');
+        clone.innerHTML = content;
+        let htmlContent = '';
+        clone.querySelectorAll('.section-wrapper').forEach(w => {
+            w.classList.remove('active');
+            w.querySelectorAll('.selected-element-highlight').forEach(el => el.classList.remove('selected-element-highlight'));
+            const section = w.querySelector('section, footer');
+            if(section) {
+                section.removeAttribute('contenteditable');
+                section.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
+                htmlContent += section.outerHTML;
+            }
+        });
+        return `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${pageName}</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body>${htmlContent}</body></html>`;
+    }
+    
+    function generateIndexHtml(pagesToExport) {
+        let indexHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Site Index</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body><nav class="navbar navbar-expand-lg navbar-dark bg-dark"><div class="container"><span class="navbar-brand">Website</span></div></nav><main class="container py-5"><h1 class="mb-4">Site Pages</h1><div class="list-group">`;
+        
+        Object.keys(pagesToExport).forEach(pageId => {
+            const page = pagesToExport[pageId];
+            const fileName = page.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '.html';
+            indexHtml += `<a href="${fileName}" class="list-group-item list-group-item-action"><h5 class="mb-1">${page.name}</h5><p class="mb-0 text-muted">Click to view this page</p></a>`;
+        });
+        
+        indexHtml += `</div></main></body></html>`;
+        return indexHtml;
+    }
+    
+    function exportMultiplePages(pagesToExport) {
+        // Fallback: Export as single combined HTML with page sections
+        let combinedHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Website</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body>`;
+        
+        Object.keys(pagesToExport).forEach((pageId, index) => {
+            const page = pagesToExport[pageId];
+            if (index > 0) combinedHtml += '<hr class="my-5">';
+            combinedHtml += `<section class="py-5"><div class="container"><h1 class="mb-4">${page.name}</h1></div></section>`;
+            
+            const clone = document.createElement('div');
+            clone.innerHTML = page.content;
+            clone.querySelectorAll('.section-wrapper').forEach(w => {
+                w.classList.remove('active');
+                w.querySelectorAll('.selected-element-highlight').forEach(el => el.classList.remove('selected-element-highlight'));
+                const section = w.querySelector('section, footer');
+                if(section) {
+                    section.removeAttribute('contenteditable');
+                    section.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
+                    combinedHtml += section.outerHTML;
+                }
+            });
+        });
+        
+        combinedHtml += '</body></html>';
+        const blob = new Blob([combinedHtml], {type: 'text/html'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'website.html';
+        a.click();
+    }
+    
+    function exportPage() {
+        // Legacy function - now calls the new modal-based export
+        showExportModal();
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

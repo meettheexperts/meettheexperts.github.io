@@ -1,0 +1,531 @@
+%%html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simplified Bootstrap Builder Template</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { display: flex; height: 100vh; overflow: hidden; background: #f0f2f5; }
+        #sidebar { width: 260px; background: #212529; color: white; padding: 20px; overflow-y: auto; flex-shrink: 0; }
+        #canvas-container { flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; }
+        #canvas { width: 100%; max-width: 1000px; background: white; min-height: 100%; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        #inspector { width: 300px; background: white; border-left: 1px solid #dee2e6; padding: 20px; display: none; flex-shrink: 0; }
+
+        .section-wrapper { position: relative; cursor: pointer; border: 2px solid transparent; margin-bottom: 15px;}
+        .section-wrapper:hover { border: 2px solid #0d6efd; }
+        .section-wrapper.active { border: 2px solid #0d6efd; z-index: 10; background: rgba(13, 110, 253, 0.02); }
+
+        /* Highlight for selected element within a section */
+        .selected-element-highlight { outline: 2px solid #ffc107; }
+
+        .inspector-label { font-size: 0.75rem; font-weight: bold; color: #6c757d; text-transform: uppercase; margin-top: 15px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h5 class="mb-4">Components</h5>
+        <div class="d-grid gap-2">
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('generic')">+ Generic Section</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('hero')">+ Hero Section</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('cards')">+ Feature Cards</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('gallery')">+ Image Gallery</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('cta')">+ Call to Action</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('form')">+ Form</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('footer')">+ Footer</button>
+        </div>
+        <hr>
+        <button class="btn btn-primary w-100 mb-2" onclick="exportPage()">Export HTML</button>
+        <button class="btn btn-secondary w-100" onclick="clearAll()">Clear All Canvas</button>
+    </div>
+
+    <div id="canvas-container">
+        <div id="canvas" onclick="deselect(event)"></div>
+    </div>
+
+   <div id="inspector">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0">Section Settings</h6>
+        <button class="btn-close btn-sm" onclick="closeInspector()"></button>
+    </div>
+
+    <label class="inspector-label">Background Color</label>
+    <input type="color" class="form-control form-control-color w-100" id="bgColor" oninput="updateStyle('backgroundColor', this.value)">
+
+    <label class="inspector-label">Text Color</label>
+    <input type="color" class="form-control form-control-color w-100" id="textColor" oninput="updateStyle('color', this.value)">
+
+    <label class="inspector-label">Vertical Padding</label>
+    <input type="range" class="form-range" min="0" max="5" step="1" id="paddingRange" oninput="updatePadding(this.value)">
+
+    <label class="inspector-label">Section Actions</label>
+    <div class="d-grid gap-2 mb-3">
+        <button class="btn btn-danger btn-sm w-100" onclick="deleteActiveSection()">Delete Section</button>
+    </div>
+
+    <label class="inspector-label">Add Elements</label>
+    <div class="d-grid gap-2 mb-4">
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('heading')">+ Heading</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('paragraph')">+ Paragraph</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('image')">+ Image</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('button')">+ Button</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('link')">+ Link</button>
+    </div>
+
+    <div id="element-inspector" style="display: none;">
+        <label class="inspector-label">Selected Element Properties</label>
+        <div class="mb-2">
+            <label for="elementId" class="form-label small">ID</label>
+            <input type="text" class="form-control form-control-sm" id="elementId" oninput="updateElementAttribute('id', this.value)">
+        </div>
+        <div class="mb-2">
+            <label for="elementClass" class="form-label small">Class</label>
+            <input type="text" class="form-control form-control-sm" id="elementClass" oninput="updateElementAttribute('className', this.value)">
+        </div>
+        <div class="mb-2" id="elementSrcContainer">
+            <label for="elementSrc" class="form-label small">Image URL (src)</label>
+            <input type="text" class="form-control form-control-sm" id="elementSrc" oninput="updateElementAttribute('src', this.value)">
+        </div>
+        <div class="mb-2" id="elementHrefContainer">
+            <label for="elementHref" class="form-label small">Link URL (href)</label>
+            <input type="text" class="form-control form-control-sm" id="elementHref" oninput="updateElementAttribute('href', this.value)">
+        </div>
+        <div class="mb-2" id="elementTextContentContainer">
+            <label for="elementTextContent" class="form-label small">Text Content</label>
+            <textarea class="form-control form-control-sm" id="elementTextContent" oninput="updateElementText(this.value)"></textarea>
+        </div>
+        <button class="btn btn-danger btn-sm w-100 mt-2" onclick="deleteSelectedElement()">Delete Element</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const inspector = document.getElementById('inspector');
+    let activeWrapper = null;
+    let selectedElement = null; // To track a selected element within a section
+
+    const templates = {
+        generic: `<section class="py-3 text-center bg-light" style="color: #000000;">
+            <div class="container">
+                <h2 contenteditable="true">Generic Section Title</h2>
+                <p contenteditable="true">This is a generic section. Click to edit content.</p>
+            </div>
+        </section>`,
+        hero: `<section class="py-5 text-center" style="background-color: #343a40; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://picsum.photos/id/1015/1200/800'); background-size: cover; background-position: center;">
+            <div class="container py-5">
+                <h1 class="display-4 fw-bold" contenteditable="true">Modern Design</h1>
+                <p class="lead" contenteditable="true">Click here to edit text directly over the background image.</p>
+            </div>
+        </section>`,
+        cards: `<section class="py-5 bg-light">
+            <div class="container">
+                <div class="row g-4 justify-content-center">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 contenteditable="true">Feature</h5>
+                                <p contenteditable="true">Description.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 contenteditable="true">Feature</h5>
+                                <p contenteditable="true">Description.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 contenteditable="true">Feature</h5>
+                                <p contenteditable="true">Description.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        gallery: `<section class="py-5" style="background-color: #ffffff;">
+            <div class="container">
+                <div class="row g-3 justify-content-center gallery-row">
+                    <div class="col-12 col-md-6 gallery-item">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-5">
+                                <img src="https://picsum.photos/id/1015/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectElement(this, event)">
+                            </div>
+                            <div class="col-md-7">
+                                <h5 contenteditable="true">Gallery Image</h5>
+                                <p contenteditable="true" class="text-muted mb-0">Beautiful photo with description. Text sits beside image on desktop, stacks below on mobile (responsive grid).</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 gallery-item">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-5">
+                                <img src="https://picsum.photos/id/1016/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectElement(this, event)">
+                            </div>
+                            <div class="col-md-7">
+                                <h5 contenteditable="true">Another Gallery Image</h5>
+                                <p contenteditable="true" class="text-muted mb-0">Another beautiful photo with description.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>`,
+        cta: `<section class="py-5 bg-primary text-white text-center">
+            <div class="container">
+                <h2 contenteditable="true">Ready to get started?</h2>
+                <p class="lead" contenteditable="true">Join us today and experience the difference.</p>
+                <button class="btn btn-light mt-3" contenteditable="true">Sign Up Now</button>
+            </div>
+        </section>`,
+        form: `<section class="py-5 bg-light">
+            <div class="container">
+                <h2 class="text-center mb-4" contenteditable="true">Contact Us</h2>
+                <form>
+                    <div class="mb-3">
+                        <label for="nameInput" class="form-label" contenteditable="true">Name</label>
+                        <input type="text" class="form-control" id="nameInput" placeholder="Your Name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="emailInput" class="form-label" contenteditable="true">Email address</label>
+                        <input type="email" class="form-control" id="emailInput" placeholder="name@example.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="messageTextarea" class="form-label" contenteditable="true">Message</label>
+                        <textarea class="form-control" id="messageTextarea" rows="3" placeholder="Your message"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" contenteditable="true">Submit</button>
+                </form>
+            </div>
+        </section>`,
+        footer: `<footer class="py-4 bg-dark text-white text-center">
+            <div class="container">
+                <p class="mb-0 small" contenteditable="true">© 2026 Your Company. All rights reserved.</p>
+            </div>
+        </footer>`
+    };
+
+    // --- Persistence Functions (Simplified) ---
+    function saveState() {
+        localStorage.setItem('simplifiedBuilderState', canvas.innerHTML);
+    }
+
+    function loadLocalState() {
+        const savedState = localStorage.getItem('simplifiedBuilderState');
+        if (savedState) {
+            canvas.innerHTML = savedState;
+            // Re-attach click handlers for existing elements after loading
+            canvas.querySelectorAll('.section-wrapper').forEach(wrapper => {
+                wrapper.onclick = (e) => handleWrapperClick(e, wrapper);
+                // Ensure all elements within sections are clickable for selection
+                wrapper.querySelectorAll('*').forEach(el => {
+                    // Exclude the section-wrapper itself and direct children like 'section' or 'div.container' from being selected as 'elements'
+                    if (!el.classList.contains('section-wrapper') && !el.closest('.section-wrapper').classList.contains('active') && el.tagName !== 'SECTION' && el.tagName !== 'DIV' && el !== wrapper && el.parentElement !== wrapper) {
+                        el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+                    }
+                });
+            });
+        }
+    }
+    window.onload = loadLocalState;
+    // --- END Persistence Functions ---
+
+    // Centralized click handler for section wrappers to distinguish between section and element clicks
+    function handleWrapperClick(e, wrapper) {
+        e.stopPropagation(); // Prevent deselect from being called on canvas click
+        // If a child element was clicked, try to select it, otherwise select the section
+        if (e.target !== wrapper && e.target.closest('.section-wrapper') === wrapper && e.target.tagName !== 'SECTION') {
+            // If the clicked element is not the wrapper itself, and it's inside, select it
+            selectElement(e.target);
+        } else {
+            selectSection(wrapper);
+        }
+    }
+
+    function addSection(type) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'section-wrapper';
+        wrapper.dataset.type = type;
+        wrapper.innerHTML = `\n            ${templates[type]}`;
+
+        wrapper.onclick = (e) => handleWrapperClick(e, wrapper);
+        canvas.appendChild(wrapper);
+        saveState();
+
+        // After adding, ensure contenteditable elements have their onblur handler for saving
+        wrapper.querySelectorAll('[contenteditable]').forEach(el => {
+            el.onblur = saveState;
+        });
+        // Make newly added elements clickable for selection
+        wrapper.querySelectorAll('*').forEach(el => {
+            // Exclude the section-wrapper itself and direct children like 'section' or 'div.container' from being selected as 'elements'
+            if (!el.classList.contains('section-wrapper') && el.tagName !== 'SECTION' && el.tagName !== 'DIV' && el !== wrapper && el.parentElement !== wrapper) {
+                el.onclick = (e) => { e.stopPropagation(); selectElement(el); };
+            }
+        });
+
+        // Select the new section automatically
+        selectSection(wrapper);
+    }
+
+    function selectSection(wrapper) {
+        if (activeWrapper) activeWrapper.classList.remove('active');
+        if (selectedElement) {
+            selectedElement.classList.remove('selected-element-highlight');
+            selectedElement = null;
+        }
+
+        activeWrapper = wrapper;
+        activeWrapper.classList.add('active');
+        inspector.style.display = 'block';
+        document.getElementById('element-inspector').style.display = 'none'; // Hide element inspector
+
+        const target = wrapper.querySelector('section, footer');
+        const styles = window.getComputedStyle(target);
+        document.getElementById('bgColor').value = rgbToHex(styles.backgroundColor);
+        document.getElementById('textColor').value = rgbToHex(styles.color);
+        // Set padding range if you implement that here
+        const currentPadding = target.className.match(/py-(\d)/);
+        document.getElementById('paddingRange').value = currentPadding ? currentPadding[1] : 3; // Default to 3 if not found
+    }
+
+    function selectElement(element) {
+        // Don't select the wrapper or section itself as an element
+        if (element.classList.contains('section-wrapper') || element.tagName === 'SECTION' || element.tagName === 'BODY' || element.tagName === 'HTML' || element === canvas || element === document.getElementById('canvas-container')) {
+            return;
+        }
+
+        // Ensure the element is within an activeWrapper before selecting it
+        const closestWrapper = element.closest('.section-wrapper');
+        if (!closestWrapper || closestWrapper !== activeWrapper) {
+            selectSection(closestWrapper || null); // Select the parent section if not already active
+            if (!closestWrapper) return; // If no wrapper, nothing to select
+        }
+
+        if (selectedElement) {
+            selectedElement.classList.remove('selected-element-highlight');
+        }
+        selectedElement = element;
+        selectedElement.classList.add('selected-element-highlight');
+        inspector.style.display = 'block';
+        populateElementInspector();
+
+        // If an editable element is clicked, attach a blur listener to save state when editing stops
+        if (element.hasAttribute('contenteditable')) {
+            element.onblur = saveState;
+        }
+    }
+
+    function populateElementInspector() {
+        const elementInspectorDiv = document.getElementById('element-inspector');
+        if (!selectedElement) {
+            elementInspectorDiv.style.display = 'none';
+            return;
+        }
+
+        elementInspectorDiv.style.display = 'block';
+
+        document.getElementById('elementId').value = selectedElement.id;
+        document.getElementById('elementClass').value = selectedElement.className;
+
+        const srcContainer = document.getElementById('elementSrcContainer');
+        const hrefContainer = document.getElementById('elementHrefContainer');
+        const textContentContainer = document.getElementById('elementTextContentContainer');
+
+        // Reset visibility
+        srcContainer.style.display = 'none';
+        hrefContainer.style.display = 'none';
+        textContentContainer.style.display = 'none';
+
+        if (selectedElement.tagName === 'IMG') {
+            srcContainer.style.display = 'block';
+            document.getElementById('elementSrc').value = selectedElement.src;
+        } else if (selectedElement.tagName === 'A') {
+            hrefContainer.style.display = 'block';
+            document.getElementById('elementHref').value = selectedElement.href;
+            textContentContainer.style.display = 'block';
+            document.getElementById('elementTextContent').value = selectedElement.textContent;
+        } else if (selectedElement.hasAttribute('contenteditable')) {
+            textContentContainer.style.display = 'block';
+            document.getElementById('elementTextContent').value = selectedElement.innerHTML; // Use innerHTML for rich contenteditable
+        }
+
+        // Make sure textContent is always editable if the element itself is editable
+        if (selectedElement.hasAttribute('contenteditable')) {
+            textContentContainer.style.display = 'block';
+            document.getElementById('elementTextContent').value = selectedElement.innerHTML;
+        } else if (!srcContainer.style.display === 'block' && !hrefContainer.style.display === 'block') {
+            // If it's not an image or link, but has text, allow editing
+            if (selectedElement.children.length === 0 && selectedElement.textContent.trim().length > 0) {
+                 textContentContainer.style.display = 'block';
+                 document.getElementById('elementTextContent').value = selectedElement.textContent;
+            }
+        }
+    }
+
+    function updateElementAttribute(attributeName, value) {
+        if (selectedElement) {
+            if (attributeName === 'className') {
+                selectedElement.className = value; // Special handling for class
+            } else {
+                selectedElement.setAttribute(attributeName, value);
+            }
+            saveState();
+        }
+    }
+
+    function updateElementText(value) {
+        if (selectedElement) {
+            if (selectedElement.hasAttribute('contenteditable')) {
+                selectedElement.innerHTML = value;
+            } else if (selectedElement.children.length === 0) { // For non-contenteditable elements with direct text
+                selectedElement.textContent = value;
+            }
+            saveState();
+        }
+    }
+
+    function updateStyle(prop, val) {
+        if(!activeWrapper) return;
+        const target = activeWrapper.querySelector('section, footer');
+        if(prop === 'backgroundColor') target.classList.remove('bg-dark', 'bg-light', 'bg-primary', 'bg-secondary', 'bg-white'); // Remove old Bootstrap BG classes
+        if(prop === 'color') target.classList.remove('text-white', 'text-dark', 'text-muted', 'text-black'); // Remove old Bootstrap text classes
+        target.style[prop] = val;
+        saveState();
+    }
+
+    function updatePadding(val) {
+        const el = activeWrapper.querySelector('section, footer');
+        el.className = el.className.replace(/py-\d/, 'py-' + val);
+        saveState();
+    }
+
+    function addElement(type) {
+        if (!activeWrapper) return;
+        const container = activeWrapper.querySelector('.container') || activeWrapper.querySelector('section, footer');
+        if (!container) return;
+
+        let html = '';
+        switch(type) {
+            case 'heading':
+                html = `<h3 contenteditable="true" class="mb-4">New Heading</h3>`;
+                break;
+            case 'paragraph':
+                html = `<p contenteditable="true" class="mb-4">New paragraph text. Click to edit.</p>`;
+                break;
+            case 'image':
+                const id = Math.floor(Math.random() * 200) + 10;
+                html = `<img src="https://picsum.photos/id/${id}/400/250" class="img-fluid rounded shadow-sm my-3" alt="New Image">`;
+                break;
+            case 'button':
+                html = `<button class="btn btn-primary my-3" contenteditable="true">Call to Action</button>`;
+                break;
+            case 'link':
+                html = `<a href="#" class="d-block my-3" contenteditable="true">Clickable Link</a>`;
+                break;
+            // Add other basic elements here if needed
+        }
+
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        const newElement = temp.firstElementChild;
+        container.appendChild(newElement);
+
+        // Make newly added elements clickable for selection
+        newElement.onclick = (e) => { e.stopPropagation(); selectElement(newElement); };
+        if (newElement.hasAttribute('contenteditable')) {
+            newElement.onblur = saveState;
+        }
+
+        saveState();
+        selectElement(newElement); // Select the newly added element
+    }
+
+    function deleteActiveSection() {
+        if (activeWrapper) {
+            activeWrapper.remove();
+            closeInspector();
+            saveState();
+        }
+    }
+
+    function deleteSelectedElement() {
+        if (selectedElement && activeWrapper && activeWrapper.contains(selectedElement)) {
+            const parent = selectedElement.parentElement;
+            selectedElement.remove();
+            selectedElement = null;
+            // Try to re-select the parent if it's still there
+            if (parent && activeWrapper.contains(parent)) {
+                selectElement(parent); // Select parent of deleted element
+            } else {
+                populateElementInspector(); // Clear inspector
+            }
+            saveState();
+        }
+    }
+
+    function closeInspector() {
+        inspector.style.display = 'none';
+        if(activeWrapper) activeWrapper.classList.remove('active');
+        if(selectedElement) selectedElement.classList.remove('selected-element-highlight');
+        activeWrapper = null;
+        selectedElement = null;
+        document.getElementById('element-inspector').style.display = 'none'; // Ensure element inspector is hidden
+    }
+
+    function deselect(e) {
+        // Only deselect everything if click is directly on canvas or canvas-container
+        if(e.target === canvas || e.target === document.getElementById('canvas-container')) {
+            closeInspector();
+            saveState(); // Save state when deselecting everything
+        } else if (e.target.hasAttribute('contenteditable')) {
+            // If an editable element is clicked, attach a blur listener to save state when editing stops
+            e.target.onblur = saveState;
+        }
+    }
+
+    function clearAll() {
+        canvas.innerHTML = '';
+        closeInspector();
+        localStorage.removeItem('simplifiedBuilderState');
+        saveState(); // Save an empty state
+    }
+
+    function rgbToHex(rgb) {
+        if (!rgb || rgb === 'transparent' || rgb.includes('rgba(0, 0, 0, 0)')) return '#ffffff';
+        const vals = rgb.match(/\d+/g);
+        return "#" + vals.slice(0,3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+    }
+
+    function exportPage() {
+        const clone = canvas.cloneNode(true);
+        let content = "";
+        clone.querySelectorAll('.section-wrapper').forEach(w => {
+            // Remove any editor-specific highlights or classes
+            w.classList.remove('active');
+            w.querySelectorAll('.selected-element-highlight').forEach(el => el.classList.remove('selected-element-highlight'));
+
+            const section = w.querySelector('section, footer');
+            if(section) {
+                // Remove contenteditable attributes
+                section.removeAttribute('contenteditable');
+                section.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
+                content += section.outerHTML;
+            }
+        });
+        const blob = new Blob([`<!DOCTYPE html><html><head><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body>${content}</body></html>`], {type: 'text/html'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'index.html';
+        a.click();
+    }
+</script>
+
+</body>
+</html>

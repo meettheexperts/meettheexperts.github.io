@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bootstrap Builder Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { display: flex; height: 100vh; overflow: hidden; background: #f0f2f5; }
+        #sidebar { width: 260px; background: #212529; color: white; padding: 20px; overflow-y: auto; flex-shrink: 0; }
+        #canvas-container { flex: 1; overflow-y: auto; padding: 40px; display: flex; justify-content: center; }
+        #canvas { width: 100%; max-width: 1000px; background: white; min-height: 100%; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        #inspector { width: 300px; background: white; border-left: 1px solid #dee2e6; padding: 20px; display: none; flex-shrink: 0; }
+
+        .section-wrapper { position: relative; cursor: pointer; border: 2px solid transparent; }
+        .section-wrapper:hover { border: 2px solid #0d6efd; }
+        .section-wrapper.active { border: 2px solid #0d6efd; z-index: 10; background: rgba(13, 110, 253, 0.02); }
+
+        .section-toolbar {
+            position: absolute; top: 5px; right: 5px; display: none; z-index: 100;
+            background: #0d6efd; border-radius: 4px; padding: 2px;
+        }
+        .section-wrapper:hover > .section-toolbar { display: flex; }
+        [contenteditable]:focus { outline: 2px solid #0d6efd; background: transparent !important;border-radius: 4px; }
+        
+        .inspector-label { font-size: 0.75rem; font-weight: bold; color: #6c757d; text-transform: uppercase; margin-top: 15px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h5 class="mb-4">Components</h5>
+        <div class="d-grid gap-2">
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('hero')">+ Hero Section</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('cards')">+ Feature Cards</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('gallery')">+ Image Gallery</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('cta')">+ Call to Action</button>
+            <button class="btn btn-outline-light btn-sm text-start" onclick="addSection('footer')">+ Footer</button>
+        </div>
+        <hr>
+        <div class="btn-group w-100" role="group">
+            <button class="btn btn-secondary btn-sm" onclick="undo()" title="Undo last action">Undo</button>
+            <button class="btn btn-secondary btn-sm" onclick="redo()" title="Redo last action">Redo</button>
+        </div>
+        <hr>
+        <button class="btn btn-primary w-100" onclick="exportPage()">Export HTML</button>
+        <button class="btn btn-link btn-sm text-secondary w-100 mt-2" onclick="clearAll()">Clear All</button>
+    </div>
+
+    <div id="canvas-container">
+        <div id="canvas" onclick="deselect(event)"></div>
+    </div>
+
+   <div id="inspector">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="m-0">Section Settings</h6>
+        <button class="btn-close btn-sm" onclick="closeInspector()"></button>
+    </div>
+    
+    <label class="inspector-label">Background Color</label>
+    <input type="color" class="form-control form-control-color w-100" id="bgColor" oninput="updateStyle('backgroundColor', this.value)">
+
+    <label class="inspector-label">Text Color</label>
+    <input type="color" class="form-control form-control-color w-100" id="textColor" oninput="updateStyle('color', this.value)">
+
+    <label class="inspector-label">Vertical Padding</label>
+    <input type="range" class="form-range" min="0" max="5" step="1" id="paddingRange" oninput="updatePadding(this.value)">
+
+    <!-- Reusable Elements - Systematic approach for ANY section -->
+    <label class="inspector-label">Add Elements (reusable)</label>
+    <div class="d-grid gap-2">
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('heading')">+ Heading</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('paragraph')">+ Paragraph</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('image')">+ Image</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('button')">+ Button</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('list')">+ List</button>
+        <button class="btn btn-sm btn-outline-secondary w-100" onclick="addElement('link')">+ Link</button>
+    </div>
+
+    <!-- Image Tools (now general + gallery-specific) -->
+    <div id="image-tools">
+        <label class="inspector-label">Image Tools</label>
+        <button class="btn btn-sm btn-outline-primary w-100 mb-3" id="addPhotoBtn" onclick="addPhoto()">+ Add Photo to Gallery</button>
+        
+        <label class="inspector-label">Image / BG URL</label>
+        <input type="text" class="form-control form-control-sm" id="imgUrl" placeholder="https://..." oninput="updateImage(this.value)">
+        <small class="text-muted" style="font-size: 0.7rem;">Tip: Click any image to edit it specifically.</small>
+    </div>
+
+    <div id="card-tools" style="display:none;">
+        <label class="inspector-label">Layout</label>
+        <button class="btn btn-sm btn-outline-primary w-100 mt-2" onclick="addColumn()">+ Add Card</button>
+    </div>
+</div>
+
+
+      <script>
+        const canvas = document.getElementById('canvas');
+        const inspector = document.getElementById('inspector');
+        let activeWrapper = null;
+        let selectedImgElement = null;
+
+        // History for Undo/Redo
+        let history = [];
+        let historyIndex = -1;
+        const maxHistorySize = 50;
+
+        const templates = {
+    hero: `<section class="py-5 text-center" style="background-color: #343a40; color: #ffffff; background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://picsum.photos/id/1015/1200/800'); background-size: cover; background-position: center;">
+        <div class="container py-5">
+            <h1 class="display-4 fw-bold" contenteditable="true">Modern Design</h1>
+            <p class="lead" contenteditable="true">Click here to edit text directly over the background image.</p>
+        </div>
+    </section>`,
+    
+    cards: `<section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 contenteditable="true">Feature</h5>
+                            <p contenteditable="true">Description.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>`,
+
+    // Enhanced Gallery: now includes responsive grid inside each item
+    // → Text appears BESIDE image on desktop (md+), BELOW on mobile
+    // → Reusable grid pattern you can copy to other sections if needed
+    gallery: `<section class="py-5" style="background-color: #ffffff;">
+        <div class="container">
+            <div class="row g-3 justify-content-center gallery-row">
+                <div class="col-12 col-md-6 gallery-item">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <img src="https://picsum.photos/id/1015/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectImage(this, event)">
+                        </div>
+                        <div class="col-md-7">
+                            <h5 contenteditable="true">Gallery Image</h5>
+                            <p contenteditable="true" class="text-muted mb-0">Beautiful photo with description. Text sits beside image on desktop, stacks below on mobile (responsive grid).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>`,
+
+    cta: `<section class="py-5 bg-primary text-white text-center">
+        <div class="container">
+            <h2 contenteditable="true">Ready?</h2>
+            <button class="btn btn-light mt-3">Get Started</button>
+        </div>
+    </section>`,
+
+    footer: `<footer class="py-4 bg-dark text-white text-center">
+        <p class="mb-0 small" contenteditable="true">© 2026 Company</p>
+    </footer>`
+};
+
+        // --- History & Persistence Functions ---
+        function saveState() {
+            if (historyIndex < history.length - 1) {
+                history = history.slice(0, historyIndex + 1);
+            }
+            history.push(canvas.innerHTML);
+            if (history.length > maxHistorySize) {
+                history.shift(); // Remove oldest state
+            }
+            historyIndex = history.length - 1;
+            saveLocalState();
+        }
+
+        function restoreState(index) {
+            if (index >= 0 && index < history.length) {
+                canvas.innerHTML = history[index];
+                historyIndex = index;
+                closeInspector(); // Close inspector as elements might have changed
+            }
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                restoreState(historyIndex - 1);
+            }
+        }
+
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                restoreState(historyIndex + 1);
+            }
+        }
+
+        function saveLocalState() {
+            localStorage.setItem('builderState', canvas.innerHTML);
+        }
+
+        function loadLocalState() {
+            const savedState = localStorage.getItem('builderState');
+            if (savedState) {
+                canvas.innerHTML = savedState;
+                // Initialize history with the loaded state
+                history = [savedState];
+                historyIndex = 0;
+            }
+        }
+
+        window.onload = loadLocalState;
+        // --- END History & Persistence Functions ---
+
+        function addSection(type) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'section-wrapper';
+            wrapper.dataset.type = type;
+            wrapper.onclick = (e) => {
+                if(e.target.hasAttribute('contenteditable')) return;
+                e.stopPropagation();
+                selectSection(wrapper);
+            };
+            wrapper.innerHTML = `
+                <div class="section-toolbar btn-group shadow">
+                    <button class="btn btn-primary btn-sm" onclick="move(this, -1); saveState();">↑</button>
+                    <button class="btn btn-primary btn-sm" onclick="move(this, 1); saveState();">↓</button>
+                    <button class="btn btn-danger btn-sm" onclick="this.closest('.section-wrapper').remove(); closeInspector(); saveState();">×</button>
+                </div>
+                ${templates[type]}`;
+            canvas.appendChild(wrapper);
+            saveState();
+        }
+
+        function selectSection(wrapper) {
+            if(activeWrapper) activeWrapper.classList.remove('active');
+            activeWrapper = wrapper;
+            activeWrapper.classList.add('active');
+            inspector.style.display = 'block';
+
+            const target = wrapper.querySelector('section, footer');
+            const styles = window.getComputedStyle(target);
+            document.getElementById('bgColor').value = rgbToHex(styles.backgroundColor);
+            document.getElementById('textColor').value = rgbToHex(styles.color);
+            
+            // Image tools now always available (general + gallery-specific)
+            document.getElementById('image-tools').style.display = 'block';
+            document.getElementById('addPhotoBtn').style.display = (wrapper.dataset.type === 'gallery') ? 'block' : 'none';
+            document.getElementById('card-tools').style.display = (wrapper.dataset.type === 'cards') ? 'block' : 'none';
+            
+            selectedImgElement = null;
+        }
+
+        function selectImage(img, e) {
+            e.stopPropagation();
+            selectedImgElement = img;
+            document.querySelectorAll('.clickable-img').forEach(i => i.style.outline = "none");
+            img.style.outline = "3px solid #0d6efd";
+            document.getElementById('imgUrl').value = img.src;
+        }
+
+        // --- Enhanced Gallery (with grid) ---
+        function addPhoto() {
+            if(activeWrapper && activeWrapper.dataset.type === 'gallery') {
+                const row = activeWrapper.querySelector('.gallery-row');
+                const col = document.createElement('div');
+                col.className = 'col-12 col-md-6 gallery-item';
+                const sig = Math.floor(Math.random() * 900) + 100;
+                col.innerHTML = `
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <img src="https://picsum.photos/id/${sig}/600/400" class="img-fluid rounded shadow-sm clickable-img" style="cursor:pointer;" onclick="selectImage(this, event)">
+                        </div>
+                        <div class="col-md-7">
+                            <h5 contenteditable="true">New Gallery Image</h5>
+                            <p contenteditable="true" class="text-muted mb-0">Add your caption or description here.</p>
+                        </div>
+                    </div>
+                `;
+                row.appendChild(col);
+                saveState();
+            }
+        }
+        // --- END Gallery ---
+
+        // Reusable element adder (systematic approach for all sections)
+        function addElement(type) {
+            if (!activeWrapper) return;
+            const container = activeWrapper.querySelector('.container') || activeWrapper.querySelector('section, footer');
+            if (!container) return;
+
+            let html = '';
+            switch(type) {
+                case 'heading':
+                    html = `<h3 contenteditable="true" class="mb-4">New Heading</h3>`;
+                    break;
+                case 'paragraph':
+                    html = `<p contenteditable="true" class="mb-4">New paragraph text. Click to edit.</p>`;
+                    break;
+                case 'image':
+                    const id = Math.floor(Math.random() * 200) + 10;
+                    html = `<img src="https://picsum.photos/id/${id}/800/500" class="img-fluid rounded shadow-sm my-3 clickable-img" style="cursor:pointer;" onclick="selectImage(this, event)">`;
+                    break;
+                case 'button':
+                    html = `<button class="btn btn-primary my-3" contenteditable="true">Call to Action</button>`;
+                    break;
+                case 'list':
+                    html = `<ul class="list-group my-3"><li class="list-group-item" contenteditable="true">List Item 1</li><li class="list-group-item" contenteditable="true">List Item 2</li></ul>`;
+                    break;
+                case 'link':
+                    html = `<a href="#" class="d-block my-3" contenteditable="true">Clickable Link</a>`;
+                    break;
+            }
+
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            container.appendChild(temp.firstElementChild);
+            saveState();
+        }
+
+        function updateStyle(prop, val) {
+            if(!activeWrapper) return;
+            const target = activeWrapper.querySelector('section, footer');
+            if(prop === 'backgroundColor') target.classList.remove('bg-dark', 'bg-light', 'bg-primary', 'bg-secondary', 'bg-white');
+            if(prop === 'color') target.classList.remove('text-white', 'text-dark', 'text-muted', 'text-black');
+            target.style[prop] = val;
+            saveState();
+        }
+
+        function updatePadding(val) {
+            const el = activeWrapper.querySelector('section, footer');
+            el.className = el.className.replace(/py-\d/, 'py-' + val);
+            saveState();
+        }
+
+        // Updated image logic: works for ANY image (general or gallery) + hero BG fallback
+        function updateImage(url) {
+            if(!activeWrapper) return;
+            
+            if(selectedImgElement) {
+                selectedImgElement.src = url;
+            } 
+            else if(activeWrapper.dataset.type === 'hero') {
+                const section = activeWrapper.querySelector('section');
+                section.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${url}')`;
+            } 
+            else if(activeWrapper.dataset.type === 'gallery') {
+                const firstImg = activeWrapper.querySelector('img');
+                if(firstImg) firstImg.src = url;
+            }
+            saveState();
+        }
+
+        function addColumn() {
+            const row = activeWrapper.querySelector('.row');
+            const col = document.createElement('div');
+            col.className = 'col-md-4';
+            col.innerHTML = `<div class="card h-100 border-0 shadow-sm"><div class="card-body"><h5 contenteditable="true">New Item</h5><p contenteditable="true">Description.</p></div></div>`;
+            row.appendChild(col);
+            saveState();
+        }
+
+        function move(btn, dir) {
+            const wrap = btn.closest('.section-wrapper');
+            if(dir === -1 && wrap.previousElementSibling) canvas.insertBefore(wrap, wrap.previousElementSibling);
+            if(dir === 1 && wrap.nextElementSibling) canvas.insertBefore(wrap.nextElementSibling, wrap);
+            saveState();
+        }
+
+        function closeInspector() { 
+            inspector.style.display = 'none'; 
+            if(activeWrapper) activeWrapper.classList.remove('active'); 
+            document.querySelectorAll('.clickable-img').forEach(i => i.style.outline = "none");
+            activeWrapper = null; 
+            selectedImgElement = null;
+        }
+
+        function deselect(e) { 
+            // Check if the click was directly on the canvas or canvas-container
+            if(e.target === canvas || e.target === document.getElementById('canvas-container')) {
+                closeInspector();
+                // If clicking outside an editable element, ensure contenteditable changes are saved to history
+                saveState();
+            } else if (e.target.hasAttribute('contenteditable')) {
+                // If an editable element is clicked, attach a blur listener to save state when editing stops
+                e.target.onblur = saveState;
+            }
+        }
+        
+        // New function to clear all content and local storage
+        function clearAll() {
+            canvas.innerHTML = '';
+            closeInspector();
+            localStorage.removeItem('builderState');
+            history = [];
+            historyIndex = -1;
+            saveState(); // Save an empty state to history
+        }
+
+        function rgbToHex(rgb) {
+            if (!rgb || rgb === 'transparent' || rgb.includes('rgba(0, 0, 0, 0)')) return '#ffffff';
+            const vals = rgb.match(/\d+/g);
+            return "#" + vals.slice(0,3).map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+        }
+
+        function exportPage() {
+            const clone = canvas.cloneNode(true);
+            let content = "";
+            clone.querySelectorAll('.section-wrapper').forEach(w => {
+                w.querySelectorAll('.section-toolbar').forEach(t => t.remove());
+                w.querySelectorAll('.clickable-img').forEach(i => i.style.outline = "none");
+                const section = w.querySelector('section, footer');
+                if(section) {
+                    section.removeAttribute('contenteditable');
+                    section.querySelectorAll('[contenteditable]').forEach(e => e.removeAttribute('contenteditable'));
+                    content += section.outerHTML;
+                }
+            });
+            const blob = new Blob([`<!DOCTYPE html><html><head><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"></head><body>${content}</body></html>`], {type: 'text/html'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'index.html';
+            a.click();
+        }
+    </script>
+
+</body>
+</html>
